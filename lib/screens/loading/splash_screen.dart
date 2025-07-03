@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 import '../../utils/user_session.dart';
 
@@ -21,27 +20,34 @@ class _SplashScreenState extends State<SplashScreen> {
     _navigate();
   }
 
-  void _navigate() {
-    // Memberi jeda agar splash screen terlihat
-    Timer(const Duration(seconds: 3), () {
-      if (!mounted) return; // Pastikan widget masih ada di tree
+void _navigate() {
+  Timer(const Duration(seconds: 3), () {
+    if (!mounted) return;
 
-      if (widget.isPostAuth) {
-        // Jika ini splash screen setelah login/register, langsung ke home
-        Get.offAllNamed('/home');
-      } else {
-        final user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          // Jika sudah login, muat session dan ke home
-          final session = Get.find<UserSession>();
-          session.loadUserData(user.uid);
-          Get.offAllNamed('/login');
-        } else {
-          Get.offAllNamed('/login');
-        }
-      }
-    });
-  }
+    if (widget.isPostAuth) {
+      // Jika ini adalah splash screen setelah proses login/register,
+      // pasti langsung ke halaman utama.
+      Get.offAllNamed('/home');
+      return; // Hentikan eksekusi lebih lanjut
+    }
+
+    // Dapatkan instance UserSession
+    final session = Get.find<UserSession>();
+
+    // Periksa apakah ada user ID yang tersimpan di sesi
+    if (session.userId.value.isNotEmpty) {
+      // Jika ADA sesi aktif, langsung arahkan ke HALAMAN UTAMA.
+      // Data pengguna seharusnya sudah dimuat saat sesi diinisialisasi.
+      print("Sesi ditemukan untuk user: ${session.userId.value}. Mengarahkan ke /home.");
+      Get.offAllNamed('/home');
+    } else {
+      // Jika TIDAK ADA sesi, baru arahkan ke HALAMAN LOGIN.
+      print("Tidak ada sesi. Mengarahkan ke /login.");
+      Get.offAllNamed('/login');
+    }
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {

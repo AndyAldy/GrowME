@@ -58,6 +58,7 @@ android {
         getByName("release") {
             // Mengatur agar build type 'release' menggunakan konfigurasi 'release' yang telah dibuat di atas.
             signingConfig = signingConfigs.getByName("release")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 }

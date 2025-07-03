@@ -51,8 +51,8 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyD4WsKD6VlJSg__4QMXL4W8VC__96YjcQI',
-    appId: '1:886075402307:android:98636e6efa4b6aeb23ccf6',
+    apiKey: 'AIzaSyCPwMgDUPbjR_WYXQ49Qng0xpnrCPVkQzc',
+    appId: '1:886075402307:android:7a62f31f78f17ec423ccf6',
     messagingSenderId: '886075402307',
     projectId: 'growme-b22c2',
     storageBucket: 'growme-b22c2.firebasestorage.app',
@@ -64,7 +64,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '886075402307',
     projectId: 'growme-b22c2',
     storageBucket: 'growme-b22c2.firebasestorage.app',
-    androidClientId: '886075402307-lljf5fjibvmaonld9rck6obiuj2lph6c.apps.googleusercontent.com',
     iosBundleId: 'com.example.growmee',
   );
 
@@ -74,7 +73,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '886075402307',
     projectId: 'growme-b22c2',
     storageBucket: 'growme-b22c2.firebasestorage.app',
-    androidClientId: '886075402307-lljf5fjibvmaonld9rck6obiuj2lph6c.apps.googleusercontent.com',
     iosBundleId: 'com.example.growmee',
   );
 

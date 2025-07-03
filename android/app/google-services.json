@@ -7,24 +7,15 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:886075402307:android:98636e6efa4b6aeb23ccf6",
+        "mobilesdk_app_id": "1:886075402307:android:7a62f31f78f17ec423ccf6",
         "android_client_info": {
           "package_name": "com.growME"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "886075402307-lljf5fjibvmaonld9rck6obiuj2lph6c.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.growME",
-            "certificate_hash": "535d83dae2def6a5d21183f8ffbe52e9d5b926c1"
-          }
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyD4WsKD6VlJSg__4QMXL4W8VC__96YjcQI"
+          "current_key": "AIzaSyCPwMgDUPbjR_WYXQ49Qng0xpnrCPVkQzc"
         }
       ],
       "services": {
