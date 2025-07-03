@@ -12,7 +12,16 @@
           "package_name": "com.growME"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "886075402307-lljf5fjibvmaonld9rck6obiuj2lph6c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.growME",
+            "certificate_hash": "535d83dae2def6a5d21183f8ffbe52e9d5b926c1"
+          }
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD4WsKD6VlJSg__4QMXL4W8VC__96YjcQI"
