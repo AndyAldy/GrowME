@@ -1,46 +1,45 @@
+// lib/main.dart
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:growmee/controllers/auth_controller.dart';
-import 'package:growmee/controllers/chart_data_controller.dart';
-import 'package:growmee/controllers/user_controller.dart';
-import 'package:growmee/firebase_options.dart';
-import 'package:growmee/routes.dart';
-import 'package:growmee/theme/app_theme.dart';
-import 'package:growmee/theme/theme_provider.dart';
-import 'package:growmee/utils/user_session.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'controllers/auth_controller.dart';
+import 'controllers/user_controller.dart';
+import 'controllers/chart_data_controller.dart'; // Jika Anda punya controller ini
+import 'utils/user_session.dart';
+import 'theme/theme_provider.dart'; 
+import 'theme/app_theme.dart';
+import 'routes.dart'; // Sesuaikan dengan path file routes Anda
+import 'screens/loading/splash_screen.dart'; // Asumsi ada splash screen
+import 'firebase_options.dart';
+
 void main() async {
-  // 1. Pastikan binding siap. Ini harus selalu jadi yang pertama.
+  // 1. Pastikan semua binding siap
   WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp(
+  
+  // 2. Inisialisasi semua service yang dibutuhkan
+  await dotenv.load(fileName: ".env");
+  await GetStorage.init();
+  await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // 2. Muat semua service yang dibutuhkan & AWAIT semuanya.
-  await dotenv.load(fileName: ".env");
+  // 3. Panggil fungsi inisialisasi controller GetX
+  initServices();
 
-  await GetStorage.init();
+  runApp(const GrowME());
+}
 
-  // 3. Inisialisasi controller utama menggunakan GetX.
+/// Inisialisasi semua service dan controller secara global dan permanen.
+void initServices() {
+  Get.put(ThemeProvider(), permanent: true);
   Get.put(UserSession(), permanent: true);
+  Get.put(UserController(), permanent: true);
+  Get.put(AuthController(), permanent: true);
   Get.put(ChartDataController(), permanent: true);
-
-  // 5. Jalankan aplikasi dengan MultiProvider.
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        // UserController bergantung pada UserSession, jadi lebih baik diinisialisasi di sini.
-        ChangeNotifierProvider(create: (_) => UserController()),
-        ChangeNotifierProvider(create: (__) => AuthController()),
-      ],
-      child: const GrowME(), // Widget root aplikasi kita
-    ),
-  );
 }
 
 class GrowME extends StatelessWidget {
@@ -48,19 +47,18 @@ class GrowME extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Consumer sekarang bisa mengakses ThemeProvider dengan aman.
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
-        return GetMaterialApp(
+    // Ambil ThemeProvider dari GetX
+    final ThemeProvider themeProvider = Get.find();
+
+    // Gunakan Obx untuk merebuild saat tema berubah
+    return Obx(() => GetMaterialApp(
           title: 'GrowMe',
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
+          theme: AppTheme.lightTheme,       // Sesuaikan dengan nama tema Anda
+          darkTheme: AppTheme.darkTheme,     // Sesuaikan dengan nama tema Anda
           themeMode: themeProvider.themeMode,
           initialRoute: '/', // Selalu mulai dari splash screen
-          getPages: appPages,
-        );
-      },
-    );
+          getPages: appPages,             // Sesuaikan dengan nama routes Anda
+        ));
   }
 }

@@ -1,90 +1,62 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import '../models/user_model.dart';
-import 'package:get/get.dart';
-import '../utils/user_session.dart';
-
-class UserController extends ChangeNotifier {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-
-  UserModel? _userModel;
-  UserModel? get userModel => _userModel;
-
-  Future<bool> checkUserExists(String userId) async {
-    final doc = await _db.collection('users').doc(userId).get();
-    return doc.exists;
-  }
-
 // lib/controllers/user_controller.dart
 
-Future<void> saveInitialUserData(String userId, String email, String name) async {
-  try {
-    final userDoc = _db.collection('users').doc(userId);
-    const double initialSaldo = 0.0; // Tentukan nilai saldo awal
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
+import '../models/user_model.dart'; // Pastikan path ini benar
 
-    await userDoc.set({
-      'email': email,
-      'name': name,
-      'saldo': initialSaldo, // Gunakan variabel saldo awal
-      'fingerprintEnabled': false,
-    }, SetOptions(merge: true));
+class UserController extends GetxController {
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  
+  // Rx<UserModel?> untuk menampung data user yang bisa di-observe
+  final Rx<UserModel?> userModel = Rx<UserModel?>(null);
 
-    _userModel = UserModel(
-      uid: userId,
-      email: email,
-      name: name,
-      saldo: initialSaldo, // Gunakan variabel saldo awal
-      fingerprintEnabled: false,
-    );
+  // Getter untuk akses yang lebih mudah di UI
+  UserModel? get user => userModel.value;
 
-    notifyListeners();
-  } catch (e) {
-    print('Error saving user data: $e');
-  }
-}
-
-Future<void> fetchUserData(String userId) async {
-  // JANGAN gunakan `_auth.currentUser` di sini.
-  // Gunakan parameter `userId` yang dikirim dari LoginScreen.
-  if (userId.isEmpty) return;
-
-  try {
-    final doc = await _db.collection('users').doc(userId).get();
-    if (doc.exists) {
-      final data = doc.data()!;
-      _userModel = UserModel(
-        uid: userId, 
-        email: data['email'] ?? '',
-        name: data['name'] ?? '',
-        saldo: data['saldo'],
-        fingerprintEnabled: data['fingerprintEnabled'] ?? false,
+  Future<void> createUser(String uid, String name, String email, num saldo) async {
+    try {
+      final user = UserModel(
+        uid: uid,
+        name: name,
+        email: email,
+        saldo: saldo,
+        fingerprintEnabled: false,
       );
-      final session = Get.find<UserSession>();
-      session.setUserId(userId);
-      session.setUserName(_userModel!.name ?? '');
-
-      notifyListeners();
+      await _db.collection('users').doc(uid).set(user.toMap());
+      userModel.value = user;
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal menyimpan data pengguna: $e');
+      rethrow;
     }
-  } catch (e) {
-    print('Error fetching user data: $e');
   }
-}
 
+  Future<UserModel?> getUserData(String uid) async {
+    if (uid.isEmpty) return null;
+    try {
+      final doc = await _db.collection('users').doc(uid).get();
+      if (doc.exists) {
+        final user = UserModel.fromMap(doc.data()!, doc.id);
+        userModel.value = user;
+        return user;
+      }
+      return null;
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal mengambil data pengguna: $e');
+      return null;
+    }
+  }
+  
   Future<void> updateFingerprintStatus(String userId, bool isEnabled) async {
     try {
       await _db.collection('users').doc(userId).update({
         'fingerprintEnabled': isEnabled,
       });
-
-      if (_userModel != null && _userModel!.uid == userId) {
-        _userModel = _userModel!.copyWith(fingerprintEnabled: isEnabled);
-        notifyListeners();
+      if (userModel.value != null) {
+        // Perbarui state lokal agar UI langsung berubah
+        userModel.value = userModel.value!.copyWith(fingerprintEnabled: isEnabled);
       }
     } catch (e) {
-      print('Error updating fingerprint status: $e');
+      Get.snackbar('Error', 'Gagal memperbarui status sidik jari: $e');
     }
   }
-  
 }

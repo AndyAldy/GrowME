@@ -34,7 +34,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        // --- PERBAIKAN: Menambahkan flag untuk MultiDex ---
+        // Flag MultiDex ini sudah benar, pertahankan
         multiDexEnabled = true
     }
 
@@ -61,12 +61,12 @@ flutter {
     source = "../.."
 }
 
-// --- PERBAIKAN: Blok dependencies dipindahkan ke luar blok 'android' ---
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
     implementation(kotlin("stdlib-jdk7"))
-    implementation("androidx.multidex:multidex:2.0.1") // <-- PERBAIKAN: Menambahkan dependensi MultiDex
+    // Dependensi MultiDex ini sudah benar, pertahankan
+    implementation("androidx.multidex:multidex:2.0.1")
     implementation("androidx.fragment:fragment:1.6.1")
     implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
-    implementation("com.google.firebase:firebase-analytics") 
+    implementation("com.google.firebase:firebase-analytics")
 }

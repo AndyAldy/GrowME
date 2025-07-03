@@ -1,49 +1,51 @@
+// lib/models/user_model.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:growmee/utils/user_session.dart';
 
 class UserModel {
   final String uid;
   final String email;
-  final num? saldo; // <-- PERBAIKAN: Ganti nama dan tipe datanya
+  final num? saldo;
   final String? name;
   final bool fingerprintEnabled;
 
   UserModel({
     required this.uid,
     required this.email,
-    this.saldo, // <-- PERBAIKAN: Ganti nama
+    this.saldo,
     this.name,
     this.fingerprintEnabled = false,
   });
 
-  // Pastikan Anda juga menggantinya di semua fungsi lain di dalam file ini.
-  // Contoh di 'copyWith':
+  /// Method untuk membuat salinan objek UserModel dengan data yang diperbarui.
   UserModel copyWith({
     String? uid,
     String? email,
-    num? saldo, // <-- PERBAIKAN: Ganti nama dan tipe data
+    num? saldo,
     String? name,
     bool? fingerprintEnabled,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
       email: email ?? this.email,
-      saldo: saldo ?? this.saldo, // <-- PERBAIKAN: Ganti nama
+      saldo: saldo ?? this.saldo,
       name: name ?? this.name,
       fingerprintEnabled: fingerprintEnabled ?? this.fingerprintEnabled,
     );
   }
 
+  /// Factory constructor untuk membuat instance UserModel dari Map (misalnya, dari Firestore).
   factory UserModel.fromMap(Map<String, dynamic> map, String uid) {
     return UserModel(
       uid: uid,
       email: map['email'] ?? '',
-      saldo: map['saldo'],
-      name: map['name'],
+      saldo: map['saldo'] as num?, // Casting ke num? untuk keamanan tipe data
+      name: map['name'] as String?, // Casting ke String?
       fingerprintEnabled: map['fingerprintEnabled'] ?? false,
     );
   }
 
+  /// Method untuk mengubah instance UserModel menjadi Map.
   Map<String, dynamic> toMap() {
     return {
       'email': email,
@@ -53,22 +55,17 @@ class UserModel {
     };
   }
 
-  static UserModel? fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data();
-    if (data == null) return null;
-
+  /// Factory constructor untuk membuat instance UserModel dari DocumentSnapshot.
+  factory UserModel.fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data()!;
     return UserModel(
       uid: doc.id,
       email: data['email'] ?? '',
-      saldo: data['saldo'],
-      name: data['name'],
+      saldo: data['saldo'] as num?,
+      name: data['name'] as String?,
       fingerprintEnabled: data['fingerprintEnabled'] ?? false,
     );
   }
 
-  void updateSession(UserSession session) {
-    session.setUserId(uid);
-    session.setUserName(name ?? '');
-    session.setFingerprintEnabled(fingerprintEnabled);
-  }
+  // TIDAK ADA LAGI METHOD updateSession() DI SINI
 }

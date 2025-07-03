@@ -127,13 +127,16 @@ class _RegisterScreenState extends State<RegisterScreen>
         password: _passwordController.text.trim(),
       );
 
-if (userCredential.user != null) {
-  await userController.saveInitialUserData(
-    userCredential.user!.uid,
-    _emailController.text.trim(),
-    _nameController.text.trim(),
-  );
-        await userSession.loadUserData(userCredential.user!.uid);
+      if (userCredential.user != null) {
+        // ## PENYESUAIAN DISINI ##
+        // Mengirim saldo sebagai angka (num) 0, bukan string "0"
+        await userController.createUser(
+          userCredential.user!.uid,
+          _nameController.text.trim(),
+          _emailController.text.trim(),
+          0, // <-- Diubah dari "0" menjadi 0
+        );
+        await userSession.startSession(userCredential.user!.uid);
         Get.offAllNamed('/home');
       }
     } on FirebaseAuthException catch (e) {
