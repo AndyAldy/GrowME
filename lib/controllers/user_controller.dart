@@ -17,7 +17,7 @@ class UserController extends ChangeNotifier {
     return doc.exists;
   }
 
-  Future<void> saveInitialUserData(String userId, String email, String name) async {
+  Future<void> saveInitialUserData(String userId, String email, String name, String s) async {
     try {
       final userDoc = _db.collection('users').doc(userId);
 

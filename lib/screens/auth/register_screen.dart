@@ -129,14 +129,14 @@ class _RegisterScreenState extends State<RegisterScreen>
 
       if (userCredential.user != null) {
         // FIX: Pastikan menggunakan await karena ini adalah operasi Future
-        await userController.createUser(
+        await userController.saveInitialUserData(
           userCredential.user!.uid,
           _nameController.text.trim(),
           _emailController.text.trim(),
           "0",
         );
         // FIX: Pastikan menggunakan await
-        await userSession.startSession(userCredential.user!.uid);
+        await userSession.loadUserData(userCredential.user!.uid);
         Get.offAllNamed('/home');
       }
     } on FirebaseAuthException catch (e) {
