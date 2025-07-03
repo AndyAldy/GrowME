@@ -127,15 +127,12 @@ class _RegisterScreenState extends State<RegisterScreen>
         password: _passwordController.text.trim(),
       );
 
-      if (userCredential.user != null) {
-        // FIX: Pastikan menggunakan await karena ini adalah operasi Future
-        await userController.saveInitialUserData(
-          userCredential.user!.uid,
-          _nameController.text.trim(),
-          _emailController.text.trim(),
-          "0",
-        );
-        // FIX: Pastikan menggunakan await
+if (userCredential.user != null) {
+  await userController.saveInitialUserData(
+    userCredential.user!.uid,
+    _emailController.text.trim(),
+    _nameController.text.trim(),
+  );
         await userSession.loadUserData(userCredential.user!.uid);
         Get.offAllNamed('/home');
       }

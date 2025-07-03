@@ -29,22 +29,18 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.growME"
         minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // --- PERBAIKAN: Menambahkan flag untuk MultiDex ---
+        multiDexEnabled = true
     }
 
-    dependencies {
-    implementation("androidx.fragment:fragment:1.6.1")
-    
     signingConfigs {
-        // Gunakan create("release") untuk membuat konfigurasi baru di KTS
         create("release") {
             if (keystorePropertiesFile.exists()) {
-                // Gunakan '=' untuk assignment dan getProperty("...") untuk mengambil nilai
                 storeFile = file(keystoreProperties.getProperty("storeFile"))
                 storePassword = keystoreProperties.getProperty("storePassword")
                 keyAlias = keystoreProperties.getProperty("keyAlias")
@@ -54,16 +50,23 @@ android {
     }
 
     buildTypes {
-        // Gunakan getByName("release") untuk mengkonfigurasi build type yang sudah ada
         getByName("release") {
-            // Mengatur agar build type 'release' menggunakan konfigurasi 'release' yang telah dibuat di atas.
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 }
-}
 
 flutter {
     source = "../.."
+}
+
+// --- PERBAIKAN: Blok dependencies dipindahkan ke luar blok 'android' ---
+dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+    implementation(kotlin("stdlib-jdk7"))
+    implementation("androidx.multidex:multidex:2.0.1") // <-- PERBAIKAN: Menambahkan dependensi MultiDex
+    implementation("androidx.fragment:fragment:1.6.1")
+    implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
+    implementation("com.google.firebase:firebase-analytics") 
 }

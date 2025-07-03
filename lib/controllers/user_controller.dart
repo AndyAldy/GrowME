@@ -17,32 +17,33 @@ class UserController extends ChangeNotifier {
     return doc.exists;
   }
 
-  Future<void> saveInitialUserData(String userId, String email, String name, String s) async {
-    try {
-      final userDoc = _db.collection('users').doc(userId);
+// lib/controllers/user_controller.dart
 
-      await userDoc.set({
-        'email': email,
-        'name': name,
-        'saldo': null,
-        'fingerprintEnabled': false,
-      }, SetOptions(merge: true));
+Future<void> saveInitialUserData(String userId, String email, String name) async {
+  try {
+    final userDoc = _db.collection('users').doc(userId);
+    const double initialSaldo = 0.0; // Tentukan nilai saldo awal
 
-      _userModel = UserModel(
-        uid: userId,
-        email: email,
-        name: name,
-        saldo: null,
-        fingerprintEnabled: false,
-      );
+    await userDoc.set({
+      'email': email,
+      'name': name,
+      'saldo': initialSaldo, // Gunakan variabel saldo awal
+      'fingerprintEnabled': false,
+    }, SetOptions(merge: true));
 
-      notifyListeners();
-    } catch (e) {
-      print('Error saving user data: $e');
-    }
+    _userModel = UserModel(
+      uid: userId,
+      email: email,
+      name: name,
+      saldo: initialSaldo, // Gunakan variabel saldo awal
+      fingerprintEnabled: false,
+    );
+
+    notifyListeners();
+  } catch (e) {
+    print('Error saving user data: $e');
   }
-
-// File: lib/controllers/user_controller.dart (Perbaikan)
+}
 
 Future<void> fetchUserData(String userId) async {
   // JANGAN gunakan `_auth.currentUser` di sini.

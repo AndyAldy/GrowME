@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:growmee/controllers/auth_controller.dart';
 import 'package:growmee/controllers/chart_data_controller.dart';
 import 'package:growmee/controllers/user_controller.dart';
 import 'package:growmee/firebase_options.dart';
@@ -15,12 +16,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 void main() async {
   // 1. Pastikan binding siap. Ini harus selalu jadi yang pertama.
   WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   // 2. Muat semua service yang dibutuhkan & AWAIT semuanya.
   await dotenv.load(fileName: ".env");
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
   await GetStorage.init();
 
   // 3. Inisialisasi controller utama menggunakan GetX.
@@ -34,6 +36,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         // UserController bergantung pada UserSession, jadi lebih baik diinisialisasi di sini.
         ChangeNotifierProvider(create: (_) => UserController()),
+        ChangeNotifierProvider(create: (__) => AuthController()),
       ],
       child: const GrowME(), // Widget root aplikasi kita
     ),

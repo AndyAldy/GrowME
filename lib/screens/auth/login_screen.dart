@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart'; // GetX masih digunakan untuk routing & UserSession
 import 'package:local_auth/local_auth.dart';
+import 'package:provider/provider.dart'; // Menggunakan Provider untuk state
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:growmee/controllers/auth_controller.dart';
-import 'package:growmee/controllers/user_controller.dart';
-import 'package:growmee/utils/user_session.dart';
+
+import '../../controllers/auth_controller.dart';
+import '../../controllers/user_controller.dart';
+import '../../utils/user_session.dart';
 import '../../theme/halus.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,43 +19,58 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   final LocalAuthentication auth = LocalAuthentication();
-  final AuthController authController = Get.put(AuthController());
+
+  // HAPUS inisialisasi controller di sini. Kita akan ambil dari Provider.
+  // final AuthController authController = Get.put(AuthController());
+  // final UserController userController = Get.put(UserController());
+
   late final UserSession userSession;
-  final UserController userController = Get.put(UserController());
 
   bool _passwordVisible = false;
-
   bool _isLoading = false;
   String? _error;
-
   bool _isCheckingBiometricStatus = true;
   bool _biometricOnlyLogin = false;
   bool _isBiometricAvailable = false;
   String? _lastUserId;
+  bool _isInitDone = false; // Flag untuk memastikan inisialisasi hanya sekali
 
   @override
   void initState() {
     super.initState();
-    userSession = Get.put(UserSession(), permanent: true);
-    _loadLastUserAndCheckBiometrics();
+    // Ambil UserSession yang sudah di-register permanen di main.dart
+    userSession = Get.find<UserSession>();
+  }
+
+  // Gunakan didChangeDependencies untuk mengambil data dari Provider
+  // karena method ini dipanggil setelah initState dan memiliki context yang valid.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitDone) {
+      _loadLastUserAndCheckBiometrics();
+      _isInitDone = true;
+    }
   }
 
   Future<void> _loadLastUserAndCheckBiometrics() async {
+    // Ambil UserController dari Provider
+    final userController = Provider.of<UserController>(context, listen: false);
+
     final args = Get.arguments as Map<String, dynamic>?;
     String? userIdFromArgs = args?['userId'];
 
     if (userIdFromArgs != null) {
       _lastUserId = userIdFromArgs;
-      await _checkBiometricStatus(_lastUserId!);
+      await _checkBiometricStatus(_lastUserId!, userController);
     } else {
       final prefs = await SharedPreferences.getInstance();
       final lastUserIdFromPrefs = prefs.getString('last_user_id');
 
       if (lastUserIdFromPrefs != null) {
         _lastUserId = lastUserIdFromPrefs;
-        await _checkBiometricStatus(_lastUserId!);
+        await _checkBiometricStatus(_lastUserId!, userController);
       } else {
         if (mounted) {
           setState(() {
@@ -69,8 +86,10 @@ class _LoginScreenState extends State<LoginScreen> {
     await prefs.setString('last_user_id', userId);
   }
 
-  Future<void> _checkBiometricStatus(String userId) async {
+  // Method ini sekarang menerima UserController sebagai argumen
+  Future<void> _checkBiometricStatus(String userId, UserController userController) async {
     try {
+      // Panggil fetchUserData dari instance controller yang benar
       await userController.fetchUserData(userId);
       final isEnabled = userController.userModel?.fingerprintEnabled ?? false;
 
@@ -82,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
         });
 
         if (isEnabled) {
-          _loginWithBiometrics();
+          await _loginWithBiometrics();
         }
       }
     } catch (e) {
@@ -98,6 +117,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
+    // Ambil instance controller dari Provider di dalam method
+    final authController = Provider.of<AuthController>(context, listen: false);
+    final userController = Provider.of<UserController>(context, listen: false);
+
     setState(() {
       _isLoading = true;
       _error = null;
@@ -111,9 +134,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final userId = authController.userId;
       if (userId != null) {
-        await userController.fetchUserData(userId);
+        await userController.fetchUserData(userId); // Gunakan controller dari Provider
         await _saveLastUserId(userId);
-        Get.offAllNamed('/post_auth_splash');
+        Get.offAllNamed('/home'); // Navigasi ke home setelah berhasil
       } else {
         setState(() {
           _error = 'Login gagal: ID pengguna tidak ditemukan.';
@@ -133,7 +156,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _loginWithBiometrics() async {
+    // Ambil instance controller dari Provider di dalam method
+    final userController = Provider.of<UserController>(context, listen: false);
     bool isAuthenticated = false;
+    
+    if (!mounted) return;
+
     setState(() {
       _error = null;
     });
@@ -147,22 +175,26 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     } catch (e) {
-      setState(() {
-        _error = 'Otentikasi biometrik gagal: $e';
-      });
+      if(mounted) {
+        setState(() {
+          _error = 'Otentikasi biometrik gagal: $e';
+        });
+      }
     }
 
     if (isAuthenticated) {
       final userId = _lastUserId;
       if (userId != null) {
-        await userController.fetchUserData(userId);
+        await userController.fetchUserData(userId); // Gunakan controller dari Provider
         await _saveLastUserId(userId);
-        Get.offAllNamed('/post_auth_splash');
+        Get.offAllNamed('/home'); // Navigasi ke home setelah berhasil
       } else {
-        setState(() {
-          _error = 'ID Pengguna tidak ditemukan. Silakan login manual.';
-          _biometricOnlyLogin = false;
-        });
+        if(mounted) {
+          setState(() {
+            _error = 'ID Pengguna tidak ditemukan. Silakan login manual.';
+            _biometricOnlyLogin = false;
+          });
+        }
       }
     } else {
       if (mounted) {
@@ -173,23 +205,42 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  @override
+  Widget build(BuildContext context) {
+    // Dapatkan instance UserController di dalam build method untuk UI
+    final userController = context.watch<UserController>();
+
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: _isCheckingBiometricStatus
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  child: _biometricOnlyLogin
+                      ? _buildBiometricLoginView(userController)
+                      : _buildStandardLoginView(),
+                ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildStandardLoginView() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Align(
+        const Align(
           alignment: Alignment.topLeft,
-          child:const Image(
-              image: AssetImage('assets/img/Logo GrowME.png'),
-              height: 50,
-            ),
+          child: Image(
+            image: AssetImage('assets/img/Logo GrowME.png'),
+            height: 50,
+          ),
         ),
-
         const SizedBox(height: 80),
         const Text(
           'Welcome to GrowME',
-          textAlign: TextAlign.center, // Center the text itself
+          textAlign: TextAlign.center,
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 140),
@@ -204,7 +255,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         TextField(
           controller: _passwordController,
-          obscureText: !_passwordVisible, // Gunakan state di sini
+          obscureText: !_passwordVisible,
           decoration: InputDecoration(
             labelText: 'Password',
             labelStyle: const TextStyle(color: Colors.white),
@@ -277,7 +328,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildBiometricLoginView() {
+  Widget _buildBiometricLoginView(UserController userController) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -316,27 +367,6 @@ class _LoginScreenState extends State<LoginScreen> {
           child: const Text('Gunakan Email & Password'),
         ),
       ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // Use SafeArea to avoid UI being hidden by notches or status bars
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          // REMOVED the Center widget from here
-          child: _isCheckingBiometricStatus
-              // Center only the loading indicator
-              ? const Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
-                  child: _biometricOnlyLogin
-                      ? _buildBiometricLoginView()
-                      : _buildStandardLoginView(),
-                ),
-        ),
-      ),
     );
   }
 }

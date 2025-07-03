@@ -4,17 +4,35 @@ import 'package:growmee/utils/user_session.dart';
 class UserModel {
   final String uid;
   final String email;
-  final String? saldo;
+  final num? saldo; // <-- PERBAIKAN: Ganti nama dan tipe datanya
   final String? name;
   final bool fingerprintEnabled;
 
   UserModel({
     required this.uid,
     required this.email,
-    this.saldo,
+    this.saldo, // <-- PERBAIKAN: Ganti nama
     this.name,
     this.fingerprintEnabled = false,
   });
+
+  // Pastikan Anda juga menggantinya di semua fungsi lain di dalam file ini.
+  // Contoh di 'copyWith':
+  UserModel copyWith({
+    String? uid,
+    String? email,
+    num? saldo, // <-- PERBAIKAN: Ganti nama dan tipe data
+    String? name,
+    bool? fingerprintEnabled,
+  }) {
+    return UserModel(
+      uid: uid ?? this.uid,
+      email: email ?? this.email,
+      saldo: saldo ?? this.saldo, // <-- PERBAIKAN: Ganti nama
+      name: name ?? this.name,
+      fingerprintEnabled: fingerprintEnabled ?? this.fingerprintEnabled,
+    );
+  }
 
   factory UserModel.fromMap(Map<String, dynamic> map, String uid) {
     return UserModel(
@@ -33,22 +51,6 @@ class UserModel {
       'name': name,
       'fingerprintEnabled': fingerprintEnabled,
     };
-  }
-
-  UserModel copyWith({
-    String? uid,
-    String? email,
-    String? saldo,
-    String? name,
-    bool? fingerprintEnabled,
-  }) {
-    return UserModel(
-      uid: uid ?? this.uid,
-      email: email ?? this.email,
-      saldo: saldo ?? this.saldo,
-      name: name ?? this.name,
-      fingerprintEnabled: fingerprintEnabled ?? this.fingerprintEnabled,
-    );
   }
 
   static UserModel? fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
