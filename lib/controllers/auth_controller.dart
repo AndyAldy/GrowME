@@ -2,8 +2,8 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import 'package:growmee/controllers/user_controller.dart';
-import 'package:growmee/utils/user_session.dart';
+import '/controllers/user_controller.dart';
+import '/utils/user_session.dart';
 
 // 1. Ganti menjadi GetxController
 class AuthController extends GetxController {
@@ -12,6 +12,10 @@ class AuthController extends GetxController {
   final UserController _userController = Get.find();
   final UserSession _userSession = Get.find();
 
+
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
+  User? get currentUser => _auth.currentUser;
+  
   // 3. Gunakan .obs untuk state yang reaktif
   final RxBool isLoading = false.obs;
 

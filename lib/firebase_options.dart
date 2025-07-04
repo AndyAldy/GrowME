@@ -64,6 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '886075402307',
     projectId: 'growme-b22c2',
     storageBucket: 'growme-b22c2.firebasestorage.app',
+    androidClientId: '886075402307-5lpn3070s7gn93dtq9vbvn8ud2a8pljm.apps.googleusercontent.com',
     iosBundleId: 'com.example.growmee',
   );
 
@@ -73,6 +74,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '886075402307',
     projectId: 'growme-b22c2',
     storageBucket: 'growme-b22c2.firebasestorage.app',
+    androidClientId: '886075402307-5lpn3070s7gn93dtq9vbvn8ud2a8pljm.apps.googleusercontent.com',
     iosBundleId: 'com.example.growmee',
   );
 

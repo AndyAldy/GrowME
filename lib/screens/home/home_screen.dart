@@ -1,24 +1,26 @@
+// lib/screens/home/home_screen.dart
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '/controllers/user_controller.dart'; // <-- Pastikan ini di-import
+import '/controllers/user_controller.dart';
 import '/theme/theme_provider.dart';
 import '/widgets/nav_bar.dart';
-import '../portfolio/Chart_screen.dart';
+import '../portfolio/Chart_screen.dart'; // Sesuaikan path jika berbeda
 
-// 1. Ubah menjadi StatelessWidget, karena GetX yang akan mengelola state
+// Ubah menjadi StatelessWidget, karena GetX yang akan mengelola state
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // 2. Ambil semua controller yang dibutuhkan via Get.find()
     final ThemeProvider themeProvider = Get.find();
     final UserController userController = Get.find();
 
-    // 3. Bungkus widget utama dengan Obx agar reaktif terhadap perubahan tema
     return Obx(() {
       final isDark = themeProvider.isDarkMode;
 
@@ -37,63 +39,67 @@ class HomeScreen extends StatelessWidget {
           ),
           automaticallyImplyLeading: false,
         ),
-        body: ListView(
+        // --- PERUBAHAN UTAMA DI SINI ---
+        // Menggunakan SingleChildScrollView untuk memastikan seluruh konten bisa di-scroll
+        body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          children: [
-            // 4. Ambil nama user dari UserController, bukan UserSession
-            Obx(() => Text(
-                  'Halo ${userController.user?.name ?? 'Calon Investor'}',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.white70 : Colors.black87,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Obx(() => Text(
+                    'Halo ${userController.user?.name ?? 'Calon Investor'}',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? Colors.white70 : Colors.black87,
+                    ),
+                  )),
+              const SizedBox(height: 28),
+              Text(
+                'Quick Access',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _QuickAction(
+                    icon: Icons.show_chart,
+                    label: 'Live Chart',
+                    isDark: isDark,
+                    onTap: () => Get.to(() => const ChartScreen()),
                   ),
-                )),
-            const SizedBox(height: 28),
-            Text(
-              'Quick Access',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black,
+                  _QuickAction(
+                    icon: Icons.support_agent,
+                    label: 'Joko',
+                    isDark: isDark,
+                    onTap: () => Get.toNamed('/ai'),
+                  ),
+                  _QuickAction(
+                    icon: Icons.account_circle_outlined,
+                    label: 'Profile',
+                    isDark: isDark,
+                    onTap: () => Get.toNamed('/profile'),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _QuickAction(
-                  icon: Icons.show_chart,
-                  label: 'Live Chart',
-                  isDark: isDark,
-                  onTap: () => Get.to(() => const ChartScreen()),
+              const SizedBox(height: 28),
+              Text(
+                'Kalkulator Investasi',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black,
                 ),
-                _QuickAction(
-                  icon: Icons.support_agent,
-                  label: 'Joko',
-                  isDark: isDark,
-                  onTap: () => Get.toNamed('/ai'),
-                ),
-                _QuickAction(
-                  icon: Icons.account_circle_outlined,
-                  label: 'Profile',
-                  isDark: isDark,
-                  onTap: () => Get.toNamed('/profile'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 28),
-            Text(
-              'Kalkulator Investasi',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black,
               ),
-            ),
-            const SizedBox(height: 12),
-            InvestmentCalculator(isDark: isDark),
-          ],
+              const SizedBox(height: 12),
+              InvestmentCalculator(isDark: isDark),
+            ],
+          ),
         ),
         bottomNavigationBar: const NavBar(currentIndex: 0),
       );
@@ -124,7 +130,7 @@ class _QuickAction extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 28,
-            backgroundColor: isDark ? Colors.grey[800] : Colors.white,
+            backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
             child: Icon(icon, size: 28, color: Colors.blueAccent),
           ),
           const SizedBox(height: 6),
@@ -145,17 +151,21 @@ class _QuickAction extends StatelessWidget {
 class InvestmentCalculator extends StatefulWidget {
   final bool isDark;
 
-  const InvestmentCalculator({super.key, required this.isDark});
+
+  const InvestmentCalculator({super.key, required this.isDark,});
 
   @override
   State<InvestmentCalculator> createState() => _InvestmentCalculatorState();
 }
 
 class _InvestmentCalculatorState extends State<InvestmentCalculator> {
+  bool _isLoading = true;
   final TextEditingController _monthlyController =
       TextEditingController(text: '10000');
   int _selectedYear = 1;
   double? _result;
+  Timer? _debounce;
+  
 
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   List<Map<String, dynamic>> _reksadanaList = [];
@@ -168,26 +178,35 @@ class _InvestmentCalculatorState extends State<InvestmentCalculator> {
     _fetchAllReksadana();
   }
 
-  Future<void> _fetchAllReksadana() async {
-    final snapshot = await _db.collection('reksadana_market').get();
-    if (!mounted) return;
-    setState(() {
-      _reksadanaList = snapshot.docs.map((doc) {
-        final data = doc.data();
-        return {
-          'id': doc.id,
-          'name': data['name'],
-          'type': data['type'],
-        };
-      }).toList();
+ Future<void> _fetchAllReksadana() async {
+  final snapshot = await _db.collection('reksadana_market').get();
+  if (!mounted) return;
+  setState(() {
+    _reksadanaList = snapshot.docs.map((doc) {
+      final data = doc.data();
+      return {
+        'id': doc.id,
+        'name': data['name'],
+        'type': data['type'],
+      };
+    }).toList();
 
-      if (_reksadanaList.isNotEmpty) {
-        final first = _reksadanaList.first;
-        _selectedReksadanaId = first['id'];
-        _selectedReksadanaType = first['type'];
-      }
-    });
-  }
+    if (_reksadanaList.isNotEmpty) {
+      final first = _reksadanaList.first;
+      _selectedReksadanaId = first['id'];
+      _selectedReksadanaType = first['type'];
+    }
+
+    _isLoading = false;
+  });
+}
+
+@override
+void dispose() {
+  _monthlyController.dispose();
+  _debounce?.cancel();
+  super.dispose();
+}
 
   double getEstimatedReturn(String type, int year) {
     final Map<String, Map<int, double>> returnTable = {
@@ -215,6 +234,9 @@ class _InvestmentCalculatorState extends State<InvestmentCalculator> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
     final formatter =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     return Container(
@@ -222,13 +244,13 @@ class _InvestmentCalculatorState extends State<InvestmentCalculator> {
       decoration: BoxDecoration(
         color: widget.isDark ? Colors.grey[850] : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Nominal per Bulan:',
-              style: TextStyle(color: widget.isDark ? Colors.white : Colors.black)),
+              style: TextStyle(color: widget.isDark ? Colors.white70 : Colors.black87)),
           const SizedBox(height: 8),
           TextField(
               controller: _monthlyController,
@@ -237,23 +259,28 @@ class _InvestmentCalculatorState extends State<InvestmentCalculator> {
                 hintText: '10000',
                 filled: true,
                 fillColor: widget.isDark ? Colors.grey[800] : Colors.grey[100],
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
               ),
-              onChanged: (value) {
-                setState(() {
-                  _result = null;
-                });
-              }),
+onChanged: (value) {
+  if (_debounce?.isActive ?? false) _debounce!.cancel();
+  _debounce = Timer(const Duration(milliseconds: 500), () {
+    if (mounted) {
+      setState(() {
+        _result = null;
+      });
+    }
+  });
+}),
           const SizedBox(height: 16),
           Text('Pilih Reksadana:',
-              style: TextStyle(color: widget.isDark ? Colors.white : Colors.black)),
+              style: TextStyle(color: widget.isDark ? Colors.white70 : Colors.black87)),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
             value: _selectedReksadanaId,
             decoration: InputDecoration(
               filled: true,
               fillColor: widget.isDark ? Colors.grey[800] : Colors.grey[100],
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
             ),
             items: _reksadanaList.map((rek) {
               final label = '${rek['type']} - ${rek['name']}';
@@ -275,14 +302,14 @@ class _InvestmentCalculatorState extends State<InvestmentCalculator> {
           ),
           const SizedBox(height: 16),
           Text('Durasi Investasi (tahun):',
-              style: TextStyle(color: widget.isDark ? Colors.white : Colors.black)),
+              style: TextStyle(color: widget.isDark ? Colors.white70 : Colors.black87)),
           const SizedBox(height: 8),
           DropdownButtonFormField<int>(
             value: _selectedYear,
             decoration: InputDecoration(
               filled: true,
               fillColor: widget.isDark ? Colors.grey[800] : Colors.grey[100],
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
             ),
             items: List.generate(7, (i) => i + 1).map((year) {
               return DropdownMenuItem(value: year, child: Text('$year Tahun'));
@@ -296,17 +323,22 @@ class _InvestmentCalculatorState extends State<InvestmentCalculator> {
               }
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
               onPressed: _calculate,
               child: const Text('Hitung Keuntungan'),
             ),
           ),
           if (_result != null) ...[
             const SizedBox(height: 16),
-            Divider(color: widget.isDark ? Colors.white24 : Colors.grey),
+            Divider(color: widget.isDark ? Colors.white24 : Colors.grey[300]),
             const SizedBox(height: 12),
             Text(
               'Hasil Perhitungan:',
@@ -344,7 +376,7 @@ class _InvestmentCalculatorState extends State<InvestmentCalculator> {
                       (double.parse(_monthlyController.text.replaceAll('.', '')) *
                           12 *
                           _selectedYear)),
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.green),
                 ),
               ],
             ),
@@ -358,7 +390,7 @@ class _InvestmentCalculatorState extends State<InvestmentCalculator> {
                 Text(
                   formatter.format(_result),
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.green),
+                      fontWeight: FontWeight.bold, color: Colors.green, fontSize: 16),
                 ),
               ],
             ),

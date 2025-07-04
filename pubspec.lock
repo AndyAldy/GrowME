@@ -221,10 +221,10 @@ packages:
     dependency: transitive
     description:
       name: firebase_core_platform_interface
-      sha256: "5d2ab45779d91af2aa0252dec9fe4ee1caa015d83377de255454dcaa1526a0e0"
+      sha256: "8bcfad6d7033f5ea951d15b867622a824b13812178bfec0c779b9d81de011bbb"
       url: "https://pub.dev"
     source: hosted
-    version: "5.4.1"
+    version: "5.4.2"
   firebase_core_web:
     dependency: transitive
     description:
@@ -245,10 +245,10 @@ packages:
     dependency: "direct main"
     description:
       name: fl_chart
-      sha256: "577aeac8ca414c25333334d7c4bb246775234c0e44b38b10a82b559dd4d764e7"
+      sha256: d0f0d49112f2f4b192481c16d05b6418bd7820e021e265a3c22db98acf7ed7fb
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "0.68.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -263,13 +263,21 @@ packages:
     source: hosted
     version: "5.2.1"
   flutter_launcher_icons:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: flutter_launcher_icons
-      sha256: "10f13781741a2e3972126fae08393d3c4e01fa4cd7473326b94b72cf594195e7"
+      sha256: "526faf84284b86a4cb36d20a5e45147747b7563d921373d4ee0559c54fcdbcea"
       url: "https://pub.dev"
     source: hosted
-    version: "0.14.4"
+    version: "0.13.1"
+  flutter_lints:
+    dependency: "direct dev"
+    description:
+      name: flutter_lints
+      sha256: "9e8c3858111da373efc5aa341de011d9bd23e2c5c5e0c62bccf32438e192d7b1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.2"
   flutter_markdown:
     dependency: "direct main"
     description:
@@ -287,7 +295,7 @@ packages:
     source: hosted
     version: "2.0.28"
   flutter_test:
-    dependency: transitive
+    dependency: "direct dev"
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -297,21 +305,13 @@ packages:
     source: sdk
     version: "0.0.0"
   flutterfire_cli:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: flutterfire_cli
       sha256: "1c405f181130fcf8f85f3d9ec320660bdf36fb7a40632f538a124bb798d612db"
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
-  foundation:
-    dependency: "direct main"
-    description:
-      name: foundation
-      sha256: "6f1fda07bd2a422145724b0f94ee68fabac95fabff982d5f334fe1a38cbed6a7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.5"
   get:
     dependency: "direct main"
     description:
@@ -408,6 +408,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
+  lints:
+    dependency: transitive
+    description:
+      name: lints
+      sha256: cbf8d4b858bb0134ef3ef87841abdf8d63bfc255c266b7bf6b39daa1085c4290
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   local_auth:
     dependency: "direct main"
     description:
@@ -616,14 +624,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.0"
-  real_time_chart:
-    dependency: "direct main"
-    description:
-      name: real_time_chart
-      sha256: fb24041e9e949295e5f3eabb65ec2835fb86d4dc6a35a382bc9d2e9998915ecc
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -887,4 +887,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.8.0 <4.0.0"
-  flutter: ">=3.27.4"
+  flutter: ">=3.27.0"

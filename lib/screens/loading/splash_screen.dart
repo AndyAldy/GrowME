@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:async';
+import '../../controllers/user_controller.dart'; // <-- Tambahkan import ini
 import '../../utils/user_session.dart';
 
 class SplashScreen extends StatefulWidget {
-  // Parameter untuk membedakan splash screen awal dan setelah login
+  
   final bool isPostAuth;
 
   const SplashScreen({super.key, this.isPostAuth = false});
+
+  
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -17,37 +20,47 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    // Panggil _navigate tanpa Timer agar proses berjalan secepatnya
     _navigate();
   }
 
-void _navigate() {
-  Timer(const Duration(seconds: 3), () {
-    if (!mounted) return;
+Future<void> _navigate() async {
+  await Future.delayed(const Duration(seconds: 2));
 
-    if (widget.isPostAuth) {
-      // Jika ini adalah splash screen setelah proses login/register,
-      // pasti langsung ke halaman utama.
-      Get.offAllNamed('/home');
-      return; // Hentikan eksekusi lebih lanjut
-    }
+  if (!mounted) return;
 
-    // Dapatkan instance UserSession
+  try {
     final session = Get.find<UserSession>();
+    final userController = Get.find<UserController>();
 
-    // Periksa apakah ada user ID yang tersimpan di sesi
     if (session.userId.value.isNotEmpty) {
-      // Jika ADA sesi aktif, langsung arahkan ke HALAMAN UTAMA.
-      // Data pengguna seharusnya sudah dimuat saat sesi diinisialisasi.
-      print("Sesi ditemukan untuk user: ${session.userId.value}. Mengarahkan ke /home.");
-      Get.offAllNamed('/home');
+      print("Sesi ditemukan untuk user: ${session.userId.value}. Memuat data...");
+
+      // Tambahkan timeout saat ambil user
+      final user = await userController
+          .getUserData(session.userId.value)
+          .timeout(const Duration(seconds: 10), onTimeout: () {
+        print("Timeout saat memuat data pengguna.");
+        return null;
+      });
+
+      if (user != null) {
+        print("Data pengguna berhasil dimuat. Mengarahkan ke /home.");
+        Get.offAllNamed('/home');
+      } else {
+        print("Gagal memuat data pengguna. Mengarahkan ke /login.");
+        await session.clearSession();
+        Get.offAllNamed('/login');
+      }
     } else {
-      // Jika TIDAK ADA sesi, baru arahkan ke HALAMAN LOGIN.
       print("Tidak ada sesi. Mengarahkan ke /login.");
       Get.offAllNamed('/login');
     }
-  });
+  } catch (e) {
+    print("Error saat navigasi splash: $e. Mengarahkan ke /login.");
+    Get.offAllNamed('/login');
+  }
 }
-
 
   @override
   Widget build(BuildContext context) {
@@ -55,13 +68,13 @@ void _navigate() {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [ 
+          children: [
             Image.asset('assets/img/Logo GrowME.png', width: 150),
             const SizedBox(height: 24),
             const CircularProgressIndicator(),
             const SizedBox(height: 16),
             const Text(
-              'Sabar..',
+              'Menyiapkan data...',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             )
           ],

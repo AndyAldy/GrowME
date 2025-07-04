@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:growmee/theme/theme_provider.dart';
-import 'package:growmee/widgets/nav_bar.dart';
+import '/theme/theme_provider.dart';
+import '/widgets/nav_bar.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:growmee/controllers/auth_controller.dart';
-import 'package:growmee/controllers/user_controller.dart';
-import 'package:growmee/utils/user_session.dart';
+import '/controllers/auth_controller.dart';
+import '/controllers/user_controller.dart';
+import '/utils/user_session.dart';
 import '../../theme/halus.dart'; // Sesuaikan path jika perlu
 
 // 1. Ubah menjadi StatelessWidget

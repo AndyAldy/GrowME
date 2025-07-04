@@ -1,60 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import '../models/chat_message.dart';
 
 class MessageBubble extends StatelessWidget {
-  final ChatMessage message;
+  final String message;
+  final bool isMe;
+  final bool isTyping; // Properti ditambahkan
 
-  const MessageBubble({super.key, required this.message});
+  const MessageBubble({
+    super.key,
+    required this.message,
+    required this.isMe,
+    this.isTyping = false, // Nilai default ditambahkan
+  });
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-
-    // Menampilkan indikator loading jika pesan adalah 'typing'
-    if (message.isTyping) {
-      return Align(
-        alignment: Alignment.centerLeft,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 8, left: 15, right: 15),
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-          decoration: BoxDecoration(
-            color: colors.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: const SizedBox(
-            width: 25,
-            height: 25,
-            child: CircularProgressIndicator(strokeWidth: 3),
-          ),
-        ),
-      );
-    }
-    
-    // Menentukan warna dan alignment berdasarkan pengirim atau status error
-    Color bubbleColor;
-    if (message.isError) {
-      bubbleColor = colors.errorContainer;
-    } else if (message.isFromUser) {
-      bubbleColor = colors.primaryContainer;
-    } else {
-      bubbleColor = colors.surfaceContainerHighest;
-    }
-
-
+    final theme = Theme.of(context);
     return Align(
-      alignment: message.isFromUser ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8, left: 15, right: 15),
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
-          color: bubbleColor,
-          borderRadius: BorderRadius.circular(18),
+          color: isMe ? theme.colorScheme.primary : theme.colorScheme.secondary,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            topRight: const Radius.circular(16),
+            bottomLeft: isMe ? const Radius.circular(16) : Radius.zero,
+            bottomRight: isMe ? Radius.zero : const Radius.circular(16),
+          ),
         ),
-        child: MarkdownBody(
-          data: message.text,
-          selectable: true,
-        ),
+        child: isTyping
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : MarkdownBody(
+                data: message,
+                styleSheet: MarkdownStyleSheet(
+                  p: const TextStyle(color: Colors.white),
+                  code: const TextStyle(backgroundColor: Colors.transparent),
+                ),
+              ),
       ),
     );
   }

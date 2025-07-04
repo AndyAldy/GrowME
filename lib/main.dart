@@ -37,9 +37,9 @@ void main() async {
 void initServices() {
   Get.put(ThemeProvider(), permanent: true);
   Get.put(UserSession(), permanent: true);
-  Get.put(UserController(), permanent: true);
-  Get.put(AuthController(), permanent: true);
-  Get.put(ChartDataController(), permanent: true);
+  Get.lazyPut(() => UserController(), fenix: true);
+  Get.lazyPut(() => AuthController(), fenix: true);
+  Get.lazyPut(() => ChartDataController(), fenix: true);
 }
 
 class GrowME extends StatelessWidget {
