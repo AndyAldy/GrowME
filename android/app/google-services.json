@@ -1,30 +1,21 @@
 {
   "project_info": {
-    "project_number": "886075402307",
-    "project_id": "growme-b22c2",
-    "storage_bucket": "growme-b22c2.firebasestorage.app"
+    "project_number": "476364534423",
+    "project_id": "coba-fee10",
+    "storage_bucket": "coba-fee10.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:886075402307:android:7a62f31f78f17ec423ccf6",
+        "mobilesdk_app_id": "1:476364534423:android:da347e8b7bf0d7de346fd2",
         "android_client_info": {
           "package_name": "com.growME"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "886075402307-5lpn3070s7gn93dtq9vbvn8ud2a8pljm.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.growME",
-            "certificate_hash": "bc:ef:4f:c4:cb:b3:af:67:50:c2:ab:49:41:47:f5:a9:a5:31:4c:e1"
-          }
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCPwMgDUPbjR_WYXQ49Qng0xpnrCPVkQzc"
+          "current_key": "AIzaSyBXpzpouVy43WILWRsOVvLJI6RPi-r9AJ0"
         }
       ],
       "services": {

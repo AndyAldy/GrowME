@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import '../../controllers/chart_data_controller.dart';
 
 class ChartScreen extends StatefulWidget {
-  const ChartScreen({Key? key}) : super(key: key);
+  const ChartScreen({super.key});
 
   @override
   State<ChartScreen> createState() => _ChartScreenState();
@@ -56,7 +56,7 @@ class _ChartScreenState extends State<ChartScreen> {
 
   Future<double> _fetchPrice(String type) async {
     try {
-      final String yourDeployedBackendUrl = 'https://growmee-andyaldy-andyaldys-projects.vercel.app/';
+      const String yourDeployedBackendUrl = 'https://growmee-andyaldy-andyaldys-projects.vercel.app/';
 
       Map<String, String> queryParams;
       if (type == 'Reksadana') {
@@ -171,7 +171,7 @@ class _ChartScreenState extends State<ChartScreen> {
                       minY: minY * 0.98,
                       maxY: maxY * 1.02,
                       titlesData: FlTitlesData(
-                        bottomTitles: AxisTitles(
+                        bottomTitles: const AxisTitles(
                             sideTitles: SideTitles(showTitles: false)),
                         leftTitles: AxisTitles(
                             sideTitles: SideTitles(
@@ -196,8 +196,8 @@ class _ChartScreenState extends State<ChartScreen> {
                             );
                           },
                         )),
-                        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                       ),
                       gridData: FlGridData(
                         show: true,

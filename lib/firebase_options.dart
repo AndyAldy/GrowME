@@ -41,51 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyArsqnvt0gv8bhyiA2awUXoSWRP2TDX8OM',
-    appId: '1:886075402307:web:52da07fd1f23eb8623ccf6',
-    messagingSenderId: '886075402307',
-    projectId: 'growme-b22c2',
-    authDomain: 'growme-b22c2.firebaseapp.com',
-    storageBucket: 'growme-b22c2.firebasestorage.app',
-    measurementId: 'G-BF0P8RXX98',
+    apiKey: 'AIzaSyBJYIeKvHvI6cmFZNk5g0OOLK4Q1NWWsFg',
+    appId: '1:476364534423:web:b5f3648f38e8d86c346fd2',
+    messagingSenderId: '476364534423',
+    projectId: 'coba-fee10',
+    authDomain: 'coba-fee10.firebaseapp.com',
+    storageBucket: 'coba-fee10.firebasestorage.app',
+    measurementId: 'G-SP2K319FYE',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCPwMgDUPbjR_WYXQ49Qng0xpnrCPVkQzc',
-    appId: '1:886075402307:android:7a62f31f78f17ec423ccf6',
-    messagingSenderId: '886075402307',
-    projectId: 'growme-b22c2',
-    storageBucket: 'growme-b22c2.firebasestorage.app',
+    apiKey: 'AIzaSyBXpzpouVy43WILWRsOVvLJI6RPi-r9AJ0',
+    appId: '1:476364534423:android:da347e8b7bf0d7de346fd2',
+    messagingSenderId: '476364534423',
+    projectId: 'coba-fee10',
+    storageBucket: 'coba-fee10.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBsbHkhPAmxPtl44SHGOOsa30XtYo3Qe0k',
-    appId: '1:886075402307:ios:cfcc3ffcf23a192623ccf6',
-    messagingSenderId: '886075402307',
-    projectId: 'growme-b22c2',
-    storageBucket: 'growme-b22c2.firebasestorage.app',
-    androidClientId: '886075402307-5lpn3070s7gn93dtq9vbvn8ud2a8pljm.apps.googleusercontent.com',
+    apiKey: 'AIzaSyA6Zud622m_ukNbhg6-97fJqqC3VkPqqaA',
+    appId: '1:476364534423:ios:a47b8c648ae3fdeb346fd2',
+    messagingSenderId: '476364534423',
+    projectId: 'coba-fee10',
+    storageBucket: 'coba-fee10.firebasestorage.app',
     iosBundleId: 'com.example.growmee',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBsbHkhPAmxPtl44SHGOOsa30XtYo3Qe0k',
-    appId: '1:886075402307:ios:cfcc3ffcf23a192623ccf6',
-    messagingSenderId: '886075402307',
-    projectId: 'growme-b22c2',
-    storageBucket: 'growme-b22c2.firebasestorage.app',
-    androidClientId: '886075402307-5lpn3070s7gn93dtq9vbvn8ud2a8pljm.apps.googleusercontent.com',
+    apiKey: 'AIzaSyA6Zud622m_ukNbhg6-97fJqqC3VkPqqaA',
+    appId: '1:476364534423:ios:a47b8c648ae3fdeb346fd2',
+    messagingSenderId: '476364534423',
+    projectId: 'coba-fee10',
+    storageBucket: 'coba-fee10.firebasestorage.app',
     iosBundleId: 'com.example.growmee',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyArsqnvt0gv8bhyiA2awUXoSWRP2TDX8OM',
-    appId: '1:886075402307:web:3b3c67e00e956c7c23ccf6',
-    messagingSenderId: '886075402307',
-    projectId: 'growme-b22c2',
-    authDomain: 'growme-b22c2.firebaseapp.com',
-    storageBucket: 'growme-b22c2.firebasestorage.app',
-    measurementId: 'G-8GW1K3650M',
+    apiKey: 'AIzaSyBJYIeKvHvI6cmFZNk5g0OOLK4Q1NWWsFg',
+    appId: '1:476364534423:web:ae136b0850d1ce16346fd2',
+    messagingSenderId: '476364534423',
+    projectId: 'coba-fee10',
+    authDomain: 'coba-fee10.firebaseapp.com',
+    storageBucket: 'coba-fee10.firebasestorage.app',
+    measurementId: 'G-DSTD9T6RSF',
   );
 
 }
