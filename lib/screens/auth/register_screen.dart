@@ -108,57 +108,61 @@ class _RegisterScreenState extends State<RegisterScreen>
     });
   }
 
-  Future<void> _register() async {
-    if (_passwordController.text != _confirmPasswordController.text) {
-      setState(() {
-        _error = "Password tidak cocok!";
-      });
-      return;
-    }
-
+Future<void> _register() async {
+  if (_passwordController.text != _confirmPasswordController.text) {
     setState(() {
-      _isLoading = true;
-      _error = null;
+      _error = "Password tidak cocok!";
     });
+    return;
+  }
 
-    try {
-      final userCredential = await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+  setState(() {
+    _isLoading = true;
+    _error = null;
+  });
+
+  try {
+    final userCredential = await _auth.createUserWithEmailAndPassword(
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+    );
+
+    if (userCredential.user != null) {
+      // ✅ Tambahkan ini agar token login ter-refresh
+      await userCredential.user!.getIdToken(true); // <-- WAJIB TAMBAH
+
+      // ✅ Panggil createUser di Firestore setelah token siap
+      await userController.createUser(
+        userCredential.user!.uid,
+        _nameController.text.trim(),
+        _emailController.text.trim(),
+        0,
       );
 
-      if (userCredential.user != null) {
-        // ## PENYESUAIAN DISINI ##
-        // Mengirim saldo sebagai angka (num) 0, bukan string "0"
-        await userController.createUser(
-          userCredential.user!.uid,
-          _nameController.text.trim(),
-          _emailController.text.trim(),
-          0, // <-- Diubah dari "0" menjadi 0
-        );
-        await userSession.startSession(userCredential.user!.uid);
-        Get.offAllNamed('/home');
-      }
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        if (e.code == 'weak-password') {
-          _error = 'Password yang diberikan terlalu lemah.';
-        } else if (e.code == 'email-already-in-use') {
-          _error = 'Akun sudah ada untuk email tersebut.';
-        } else {
-          _error = 'Terjadi kesalahan. Silakan coba lagi.';
-        }
-      });
-    } catch (e) {
-      setState(() {
-        _error = 'Terjadi kesalahan. Silakan coba lagi.';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      await userSession.startSession(userCredential.user!.uid);
+      Get.offAllNamed('/home');
     }
+} on FirebaseAuthException catch (e) {
+  print("Register Error: ${e.code} - ${e.message}");
+  setState(() {
+    if (e.code == 'weak-password') {
+      _error = 'Password yang diberikan terlalu lemah.';
+    } else if (e.code == 'email-already-in-use') {
+      _error = 'Akun sudah ada untuk email tersebut.';
+    } else {
+      _error = '[${e.code}] Terjadi kesalahan. ${e.message}';
+    }
+  });
+} catch (e) {
+    setState(() {
+      _error = 'Terjadi kesalahan. Silakan coba lagi.';
+    });
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
   }
+}
 
   @override
   void dispose() {
@@ -195,7 +199,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Image.asset('assets/GrowME.png', height: 100),
+                    Image.asset('assets/img/Logo_GrowME.png', height: 100),
                     const SizedBox(height: 30),
                     if (_error != null)
                       Padding(

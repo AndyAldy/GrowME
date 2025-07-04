@@ -18,11 +18,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeProvider themeProvider = Get.find();
-    final UserController userController = Get.find();
-
-    return Obx(() {
-      final isDark = themeProvider.isDarkMode;
+  final themeProvider = Get.find<ThemeProvider>();
+  final userController = Get.find<UserController>();
+  final isDark = themeProvider.isDarkMode;
 
       return Scaffold(
         backgroundColor: isDark ? Colors.black : Colors.white,
@@ -103,9 +101,8 @@ class HomeScreen extends StatelessWidget {
         ),
         bottomNavigationBar: const NavBar(currentIndex: 0),
       );
-    });
+    }
   }
-}
 
 // Widget _QuickAction tidak perlu diubah
 class _QuickAction extends StatelessWidget {

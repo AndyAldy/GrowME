@@ -1,23 +1,20 @@
+import 'package:GrowME/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:local_auth/local_auth.dart';
 import '/controllers/auth_controller.dart';
 import '/controllers/user_controller.dart';
 import '/utils/user_session.dart';
-import '../../theme/halus.dart'; // Sesuaikan path jika perlu
+import '../../theme/halus.dart';
 
-// 1. Ubah menjadi StatelessWidget
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // 2. Pindahkan semua controller dan variabel ke dalam build method agar lebih rapi
-    final AuthController authController = Get.find();
-    final TextEditingController emailController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
-    
-    // Gunakan RxBool untuk state lokal yang simpel seperti password visibility
+    final authController = Get.find<AuthController>();
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
     final RxBool passwordVisible = false.obs;
 
     return Scaffold(
@@ -26,20 +23,15 @@ class LoginScreen extends StatelessWidget {
         painter: SmoothLinePainter(),
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(24),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Image.asset(
-                  'assets/GrowME.png',
-                  height: 120,
-                ),
+                Image.asset('assets/img/Logo_GrowME.png', height: 120),
                 const SizedBox(height: 40),
-                // Untuk biometrik, kita bisa buat widget terpisah agar lebih clean
                 const BiometricLoginSection(),
-                
-                // Form Login
+
+                // Email Field
                 TextField(
                   controller: emailController,
                   decoration: InputDecoration(
@@ -57,71 +49,68 @@ class LoginScreen extends StatelessWidget {
                   keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 20),
+
+                // Password Field
                 Obx(() => TextField(
-                  controller: passwordController,
-                  obscureText: !passwordVisible.value,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    labelStyle: const TextStyle(color: Colors.white),
-                    prefixIcon: const Icon(Icons.lock, color: Colors.white70),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        passwordVisible.value ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.white70,
+                      controller: passwordController,
+                      obscureText: !passwordVisible.value,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        labelStyle: const TextStyle(color: Colors.white),
+                        prefixIcon:
+                            const Icon(Icons.lock, color: Colors.white70),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            passwordVisible.value
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.white70,
+                          ),
+                          onPressed: () {
+                            passwordVisible.value = !passwordVisible.value;
+                          },
+                        ),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.1),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
                       ),
-                      onPressed: () {
-                        passwordVisible.value = !passwordVisible.value;
-                      },
-                    ),
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.1),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  style: const TextStyle(color: Colors.white),
-                )),
+                      style: const TextStyle(color: Colors.white),
+                    )),
                 const SizedBox(height: 30),
-                
-                // Tombol Login yang reaktif
+
+                // Tombol Login
                 Obx(() => authController.isLoading.value
                     ? const Center(child: CircularProgressIndicator())
-                    : SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            // 3. Panggil fungsi dari controller secara langsung
-                            final user = await authController.signInWithEmail(
-                              emailController.text.trim(),
-                              passwordController.text.trim(),
-                            );
-                            if (user != null) {
-                              Get.offAllNamed('/home');
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            backgroundColor: Colors.blue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            'Login',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
+                    : ElevatedButton(
+                        onPressed: () async {
+                          final user = await authController.signInWithEmail(
+                            emailController.text.trim(),
+                            passwordController.text.trim(),
+                          );
+                          if (user != null) {
+                            Get.offAllNamed('/home');
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
+                        child: const Text('Login',
+                            style: TextStyle(
+                                fontSize: 18, color: Colors.white)),
                       )),
                 const SizedBox(height: 16),
+
                 TextButton(
-                  onPressed: () {
-                    Get.toNamed('/register');
-                  },
-                  child: const Text(
-                    'Belum punya akun? Daftar sekarang',
-                    style: TextStyle(color: Colors.white70),
-                  ),
+                  onPressed: () => Get.toNamed('/register'),
+                  child: const Text('Belum punya akun? Daftar sekarang',
+                      style: TextStyle(color: Colors.white70)),
                 ),
               ],
             ),
@@ -133,6 +122,7 @@ class LoginScreen extends StatelessWidget {
 }
 
 
+
 // Widget terpisah untuk logika Biometrik agar lebih rapi
 class BiometricLoginSection extends StatefulWidget {
   const BiometricLoginSection({super.key});
@@ -142,44 +132,62 @@ class BiometricLoginSection extends StatefulWidget {
 }
 
 class _BiometricLoginSectionState extends State<BiometricLoginSection> {
-  final LocalAuthentication auth = LocalAuthentication();
-  final UserSession userSession = Get.find();
-  final UserController userController = Get.find();
+  final auth = LocalAuthentication();
+  final session = Get.find<UserSession>();
+  final userController = Get.find<UserController>();
 
-  bool _isCheckingBiometricStatus = true;
-  bool _showBiometricLogin = false;
+  bool _isChecking = true;
+  bool _showBiometric = false;
   String? _lastUserId;
 
   @override
   void initState() {
     super.initState();
-    _loadLastUserAndCheckBiometrics();
+    _checkBiometrics();
   }
 
-  Future<void> _loadLastUserAndCheckBiometrics() async {
-    final Map<String, dynamic>? args = Get.arguments as Map<String, dynamic>?;
-    final lastUserId = userSession.userId.isNotEmpty ? userSession.userId.value : args?['userId'] as String?;
-    
-    if (lastUserId == null || lastUserId.isEmpty) {
-        setState(() => _isCheckingBiometricStatus = false);
-        return;
+  Future<void> _checkBiometrics() async {
+    final args = Get.arguments;
+    String? extractedUserId;
+
+    if (args is Map && args['userId'] is String) {
+      extractedUserId = args['userId'] as String;
     }
 
-    final user = await userController.getUserData(lastUserId);
-    final canCheckBiometrics = await auth.canCheckBiometrics;
-    
+    final userId =
+        session.userId.isNotEmpty ? session.userId.value : extractedUserId;
+
+    if (userId == null || userId.isEmpty) {
+      setState(() => _isChecking = false);
+      return;
+    }
+
+    UserModel? user;
+    try {
+      user = await userController
+          .getUserData(userId)
+          .timeout(const Duration(seconds: 10), onTimeout: () {
+        print("[BIOMETRIK] Timeout");
+        return null;
+      });
+    } catch (e) {
+      print("[BIOMETRIK] Error getUserData: $e");
+    }
+
+    final canBiometric = await auth.canCheckBiometrics;
+
     if (mounted) {
       setState(() {
-        _lastUserId = lastUserId;
-        _showBiometricLogin = canCheckBiometrics && (user?.fingerprintEnabled ?? false);
-        _isCheckingBiometricStatus = false;
+        _lastUserId = userId;
+        _showBiometric = canBiometric && (user?.fingerprintEnabled ?? false);
+        _isChecking = false;
       });
     }
   }
 
-  Future<void> _authenticateWithBiometrics() async {
+  Future<void> _authenticate() async {
     try {
-      bool authenticated = await auth.authenticate(
+      final authenticated = await auth.authenticate(
         localizedReason: 'Login dengan sidik jari',
         options: const AuthenticationOptions(
           useErrorDialogs: true,
@@ -188,35 +196,33 @@ class _BiometricLoginSectionState extends State<BiometricLoginSection> {
       );
 
       if (authenticated && _lastUserId != null) {
-        await userSession.startSession(_lastUserId!);
+        await session.startSession(_lastUserId!);
         await userController.getUserData(_lastUserId!);
         Get.offAllNamed('/home');
       }
     } catch (e) {
-      Get.snackbar('Gagal', 'Tidak dapat melakukan autentikasi sidik jari.');
+      Get.snackbar('Gagal', 'Autentikasi sidik jari gagal');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isCheckingBiometricStatus) {
-      return const SizedBox(height: 50, child: Center(child: CircularProgressIndicator()));
+    if (_isChecking) {
+      return const SizedBox(
+          height: 50, child: Center(child: CircularProgressIndicator()));
     }
-    
-    if (!_showBiometricLogin) {
-      // Tidak menampilkan apa-apa jika biometrik tidak aktif/tersedia
-      return const SizedBox.shrink();
-    }
-    
+
+    if (!_showBiometric) return const SizedBox.shrink();
+
     return Column(
       children: [
         ElevatedButton.icon(
-          onPressed: _authenticateWithBiometrics,
+          onPressed: _authenticate,
           icon: const Icon(Icons.fingerprint),
           label: const Text("Login dengan Sidik Jari"),
           style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white,
             backgroundColor: Colors.blue.withOpacity(0.8),
+            foregroundColor: Colors.white,
             minimumSize: const Size(double.infinity, 50),
           ),
         ),

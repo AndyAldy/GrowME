@@ -12,8 +12,7 @@ import 'controllers/chart_data_controller.dart'; // Jika Anda punya controller i
 import 'utils/user_session.dart';
 import 'theme/theme_provider.dart'; 
 import 'theme/app_theme.dart';
-import 'routes.dart'; // Sesuaikan dengan path file routes Anda
-import 'screens/loading/splash_screen.dart'; // Asumsi ada splash screen
+import 'routes.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -23,9 +22,11 @@ void main() async {
   // 2. Inisialisasi semua service yang dibutuhkan
   await dotenv.load(fileName: ".env");
   await GetStorage.init();
+  if (Firebase.apps.isEmpty) {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  }
 
   // 3. Panggil fungsi inisialisasi controller GetX
   initServices();
@@ -40,6 +41,11 @@ void initServices() {
   Get.lazyPut(() => UserController(), fenix: true);
   Get.lazyPut(() => AuthController(), fenix: true);
   Get.lazyPut(() => ChartDataController(), fenix: true);
+  Get.find<UserController>();
+  Get.find<AuthController>();
+Get.find<ChartDataController>();
+  Get.find<ThemeProvider>();
+  Get.find<UserSession>();
 }
 
 class GrowME extends StatelessWidget {
@@ -47,18 +53,18 @@ class GrowME extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ambil ThemeProvider dari GetX
-    final ThemeProvider themeProvider = Get.find();
-
-    // Gunakan Obx untuk merebuild saat tema berubah
-    return Obx(() => GetMaterialApp(
-          title: 'GrowMe',
+    return GetBuilder<ThemeProvider>(
+      builder: (themeProvider) {
+        return GetMaterialApp(
+          title: 'GrowME',
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,       // Sesuaikan dengan nama tema Anda
-          darkTheme: AppTheme.darkTheme,     // Sesuaikan dengan nama tema Anda
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
           themeMode: themeProvider.themeMode,
-          initialRoute: '/', // Selalu mulai dari splash screen
-          getPages: appPages,             // Sesuaikan dengan nama routes Anda
-        ));
+          initialRoute: '/',
+          getPages: appPages,
+        );
+      },
+    );
   }
 }

@@ -5,22 +5,34 @@ import 'package:get/get.dart';
 import '/controllers/user_controller.dart';
 import '/utils/user_session.dart';
 
-// 1. Ganti menjadi GetxController
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  // 2. Gunakan Get.find() untuk mengambil controller lain
-  final UserController _userController = Get.find();
-  final UserSession _userSession = Get.find();
 
+  late final UserController _userController;
+  late final UserSession _userSession;
+
+  final RxBool isLoading = false.obs;
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
   User? get currentUser => _auth.currentUser;
-  
-  // 3. Gunakan .obs untuk state yang reaktif
-  final RxBool isLoading = false.obs;
 
-  /// Fungsi untuk mendaftarkan pengguna baru.
-  /// Ini sudah termasuk membuat user di Auth dan menyimpan datanya di Firestore.
+  @override
+  void onInit() {
+    super.onInit();
+
+    if (Get.isRegistered<UserController>()) {
+      _userController = Get.find<UserController>();
+    } else {
+      throw Exception('UserController belum tersedia saat AuthController dibuat');
+    }
+
+    if (Get.isRegistered<UserSession>()) {
+      _userSession = Get.find<UserSession>();
+    } else {
+      throw Exception('UserSession belum tersedia saat AuthController dibuat');
+    }
+  }
+
   Future<User?> register(String name, String email, String password) async {
     isLoading.value = true;
     try {
@@ -28,25 +40,25 @@ class AuthController extends GetxController {
         email: email,
         password: password,
       );
-      
+
       User? user = userCredential.user;
       if (user != null) {
-        // Panggil UserController untuk membuat data di Firestore
         await _userController.createUser(user.uid, name, email, 0);
-        // Mulai sesi
         await _userSession.startSession(user.uid);
       }
       return user;
     } on FirebaseAuthException catch (e) {
       Get.snackbar('Error Registrasi', e.message ?? 'Terjadi kesalahan');
       return null;
+    } catch (e, stack) {
+      Get.snackbar('Error', 'Kesalahan tidak diketahui: $e');
+      print('Unexpected error (register): $e\n$stack');
+      return null;
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Fungsi untuk login pengguna.
-  /// Ini sudah termasuk login di Auth dan mengambil data dari Firestore.
   Future<User?> signInWithEmail(String email, String password) async {
     isLoading.value = true;
     try {
@@ -54,24 +66,25 @@ class AuthController extends GetxController {
         email: email,
         password: password,
       );
-      
+
       User? user = userCredential.user;
       if (user != null) {
-        // Mulai sesi
         await _userSession.startSession(user.uid);
-        // Ambil data user lengkap setelah login
         await _userController.getUserData(user.uid);
       }
       return user;
     } on FirebaseAuthException catch (e) {
       Get.snackbar('Error Login', e.message ?? 'Email atau password salah');
       return null;
+    } catch (e, stack) {
+      Get.snackbar('Error', 'Kesalahan tidak diketahui: $e');
+      print('Unexpected error (signIn): $e\n$stack');
+      return null;
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Fungsi untuk logout.
   Future<void> logout() async {
     final lastUserId = _userSession.userId.value;
     final user = await _userController.getUserData(lastUserId);
@@ -79,10 +92,9 @@ class AuthController extends GetxController {
 
     await _auth.signOut();
     await _userSession.clearSession();
-    
-    // Arahkan ke halaman login dan kirim argumen untuk biometrik
+
     Get.offAllNamed(
-      '/login', 
+      '/login',
       arguments: {
         'userId': lastUserId,
         'biometricEnabled': isFingerprintOn,

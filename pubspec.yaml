@@ -58,4 +58,4 @@ flutter:
   uses-material-design: true
   assets:
     - .env
-    - assets/img/Logo GrowME.png
+    - assets/img/Logo_GrowME.png
