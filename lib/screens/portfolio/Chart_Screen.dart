@@ -112,15 +112,12 @@ class _ChartScreenState extends State<ChartScreen> {
       return Scaffold(
         backgroundColor: isDark ? Colors.black : Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.blue,
+          backgroundColor: isDark ? Colors.lightBlueAccent : const Color.fromARGB(255, 192, 254, 121),
+          foregroundColor: isDark ? Colors.black : Colors.black,
           title: Obx(() => Text(
                 'Grafik ${controller.selectedProduct.value}',
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color : isDark ? Colors.black : const Color.fromARGB(255, 36, 36, 36)),
               )),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black),
-            onPressed: () => Get.back(),
-          ),
         ),
         body: Column(
           children: [

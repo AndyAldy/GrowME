@@ -14,48 +14,41 @@ final List<GetPage> appPages = [
     page: () => const SplashScreen(),
     transition: Transition.fadeIn,
   ),
-  // Rute setelah login/register berhasil
-  GetPage(
-    name: '/post_auth_splash',
-    page: () => const SplashScreen(isPostAuth: true),
-    transition: Transition.fadeIn,
-  ),
-
   // Rute lainnya dengan transisi halus
   GetPage(
     name: '/login',
     page: () => const LoginScreen(),
-    transition: Transition.fadeIn,
+    transition: Transition.leftToRight,
     transitionDuration: const Duration(milliseconds: 400),
   ),
   GetPage(
     name: '/register',
     page: () => const RegisterScreen(),
-    transition: Transition.fadeIn,
+    transition: Transition.leftToRight,
     transitionDuration: const Duration(milliseconds: 400),
   ),
   GetPage(
     name: '/home',
     page: () => const HomeScreen(),
-    transition: Transition.fadeIn,
+    transition: Transition.leftToRight,
     transitionDuration: const Duration(milliseconds: 400),
   ),
   GetPage(
     name: '/live',
     page: () => const ChartScreen(),
-    transition: Transition.fadeIn,
+    transition: Transition.leftToRight,
     transitionDuration: const Duration(milliseconds: 400),
   ),
   GetPage(
     name: '/ai',
     page: () => const ChatScreen(),
-    transition: Transition.fadeIn,
+    transition: Transition.leftToRight,
     transitionDuration: const Duration(milliseconds: 200),
   ),
   GetPage(
     name: '/profile',
     page: () => const ProfileScreen(),
-    transition: Transition.fadeIn,
+    transition: Transition.leftToRight,
     transitionDuration: const Duration(milliseconds: 400),
   ),
 ];

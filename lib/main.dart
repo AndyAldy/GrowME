@@ -5,47 +5,25 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:provider/provider.dart';
-import 'controllers/auth_controller.dart';
-import 'controllers/user_controller.dart';
-import 'controllers/chart_data_controller.dart';
-import 'utils/user_session.dart';
-import 'theme/theme_provider.dart'; 
+import 'app_bindings.dart';
+import 'theme/theme_provider.dart';
 import 'theme/app_theme.dart';
 import 'routes.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  // 1. Pastikan semua binding siap
+  // 1. Pastikan semua binding framework siap
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // 2. Inisialisasi semua service yang dibutuhkan
+
+  // 2. Inisialisasi service pihak ketiga
   await dotenv.load(fileName: ".env");
   await GetStorage.init();
-  if (Firebase.apps.isEmpty) {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  }
 
-  // 3. Panggil fungsi inisialisasi controller GetX
-  initServices();
-
+  // 3. Jalankan aplikasi
   runApp(const GrowME());
-}
-
-/// Inisialisasi semua service dan controller secara global dan permanen.
-void initServices() {
-  Get.put(ThemeProvider(), permanent: true);
-  Get.put(UserSession(), permanent: true);
-  Get.lazyPut(() => UserController(), fenix: true);
-  Get.lazyPut(() => AuthController(), fenix: true);
-  Get.lazyPut(() => ChartDataController(), fenix: true);
-  Get.find<UserController>();
-  Get.find<AuthController>();
-Get.find<ChartDataController>();
-  Get.find<ThemeProvider>();
-  Get.find<UserSession>();
 }
 
 class GrowME extends StatelessWidget {
@@ -53,18 +31,23 @@ class GrowME extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ThemeProvider>(
-      builder: (themeProvider) {
-        return GetMaterialApp(
-          title: 'GrowME',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: themeProvider.themeMode,
-          initialRoute: '/',
-          getPages: appPages,
-        );
-      },
+    // ThemeProvider sudah di-handle oleh AppBindings, jadi kita bisa langsung find
+    final themeProvider = Get.put(ThemeProvider());
+
+    return GetMaterialApp(
+      title: 'GrowME',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      // Cukup gunakan getter dari ThemeProvider
+      themeMode: themeProvider.theme,
+
+      // 4. Atur initialBinding ke AppBindings
+      initialBinding: AppBindings(),
+
+      // Rute awal Anda
+      initialRoute: '/', // Pastikan rute ini ada di `appPages`
+      getPages: appPages,
     );
   }
 }

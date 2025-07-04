@@ -27,14 +27,13 @@ class HomeScreen extends StatelessWidget {
       return Scaffold(
         backgroundColor: isDark ? Colors.black : Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.blue,
+          backgroundColor:isDark ? Colors.lightBlueAccent : const Color.fromARGB(255, 192, 254, 121),
           elevation: 0,
           title: Text(
             'Kalkulator Investasi',
             style: TextStyle(
-              fontWeight: FontWeight.bold,
               fontSize: 22,
-              color: isDark ? Colors.white : Colors.white,
+              color: isDark ? const Color.fromARGB(255, 55, 55, 55) : const Color.fromARGB(255, 48, 48, 48),
             ),
           ),
           automaticallyImplyLeading: false,
@@ -129,7 +128,7 @@ class _QuickAction extends StatelessWidget {
           CircleAvatar(
             radius: 28,
             backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-            child: Icon(icon, size: 28, color: Colors.blueAccent),
+            child: Icon(icon, size: 28, color: isDark ? Color(0xFF87CEEB) : Colors.blueAccent),
           ),
           const SizedBox(height: 6),
           Text(
@@ -342,8 +341,8 @@ class _InvestmentCalculatorState extends State<InvestmentCalculator> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
+                backgroundColor: Color(0xFF87CEEB),
+                foregroundColor: const Color.fromARGB(255, 42, 42, 42),
               ),
               onPressed: _calculate,
               child: const Text('Hitung Keuntungan'),

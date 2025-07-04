@@ -1,52 +1,43 @@
-import 'dart:async'; // Diperlukan untuk StreamSubscription
-
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as auth; // Alias untuk User dari firebase_auth
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:get/get.dart';
-import 'package:GrowME/controllers/auth_controller.dart';
+// Path import diperbaiki
+import 'package:GrowME/controllers/auth_controller.dart'; 
 import '../models/user_model.dart';
 
 class UserController extends GetxController {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  // Dapatkan instance AuthController untuk mengetahui status login pengguna
   final AuthController _authController = Get.find();
-
-  // Variabel 'user' sekarang menjadi Rx<UserModel?> untuk konsistensi.
-  // UI akan "mendengarkan" perubahan pada variabel ini.
   final Rx<UserModel?> user = Rx<UserModel?>(null);
-
-  // StreamSubscription untuk membatalkan listener saat tidak diperlukan
   StreamSubscription<DocumentSnapshot>? _userStreamSubscription;
 
   @override
   void onInit() {
     super.onInit();
-    // Secara otomatis memantau perubahan status autentikasi (login/logout)
+    // Mendengarkan variabel 'user' dari AuthController
     ever(_authController.user, _onAuthStateChanged);
   }
 
-  /// Method ini akan dipanggil setiap kali status autentikasi berubah.
   void _onAuthStateChanged(auth.User? firebaseUser) {
     if (firebaseUser == null) {
-      // Jika user logout, hapus data user dan hentikan listener
       user.value = null;
       _userStreamSubscription?.cancel();
     } else {
-      // Jika user login, mulai mendengarkan data user dari Firestore
       _listenToUserData(firebaseUser.uid);
     }
   }
 
-  /// Mendengarkan perubahan pada dokumen user di Firestore secara real-time.
+  /// Mendengarkan perubahan data pengguna secara real-time.
   void _listenToUserData(String uid) {
-    _userStreamSubscription?.cancel(); // Hentikan listener sebelumnya jika ada
+    _userStreamSubscription?.cancel();
     _userStreamSubscription =
-        _db.collection('users').doc(uid).snapshots().listen((snapshot) {
+        // Casting DocumentSnapshot ke tipe yang benar
+        _db.collection('users').doc(uid).snapshots().listen((DocumentSnapshot<Map<String, dynamic>> snapshot) {
       if (snapshot.exists && snapshot.data() != null) {
-        // Jika dokumen ada, perbarui state 'user' dengan data baru
-        user.value = UserModel.fromMap(snapshot.data()!, snapshot.id);
+        // FIX: Menggunakan constructor `fromDocument` yang benar sesuai model Anda.
+        user.value = UserModel.fromDocument(snapshot);
       } else {
-        // Jika dokumen tidak ada (misal, user baru yg datanya belum dibuat)
         user.value = null;
       }
     }, onError: (error) {
@@ -55,8 +46,24 @@ class UserController extends GetxController {
     });
   }
 
-  /// Membuat dokumen user baru di Firestore.
-  /// State lokal akan terupdate otomatis karena adanya stream listener.
+  /// Mengambil data pengguna satu kali saja.
+  Future<UserModel?> getUserData(String uid) async {
+    if (uid.isEmpty) return null;
+    try {
+      // Casting DocumentSnapshot ke tipe yang benar
+      final doc = await _db.collection('users').doc(uid).get();
+      if (doc.exists) {
+        // FIX: Menggunakan constructor `fromDocument` yang benar sesuai model Anda.
+        return UserModel.fromDocument(doc);
+      }
+      return null;
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal mengambil data untuk sesi: $e');
+      return null;
+    }
+  }
+
+  /// Membuat dokumen pengguna baru di Firestore.
   Future<void> createUser(String uid, String name, String email, num saldo) async {
     try {
       final userModel = UserModel(
@@ -74,7 +81,6 @@ class UserController extends GetxController {
   }
 
   /// Mengupdate status sidik jari di Firestore.
-  /// State lokal akan terupdate otomatis karena adanya stream listener.
   Future<void> updateFingerprintStatus(String userId, bool isEnabled) async {
     if (userId.isEmpty) return;
     try {
@@ -86,7 +92,6 @@ class UserController extends GetxController {
     }
   }
 
-  // Hentikan listener saat controller dihancurkan untuk mencegah memory leak
   @override
   void onClose() {
     _userStreamSubscription?.cancel();

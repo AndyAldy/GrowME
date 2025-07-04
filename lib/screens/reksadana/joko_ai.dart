@@ -5,6 +5,8 @@ import '../../services/gemini_service.dart';
 import '../../widgets/message_bubble.dart';
 import '../../widgets/message_input_bar.dart';
 import '../../widgets/nav_bar.dart';
+import '../../theme/theme_provider.dart';
+import 'package:get/get.dart'; // Import AppTheme untuk akses tema
 
 // Unused imports removed for cleaner code
 
@@ -23,7 +25,7 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isLoading = false;
   final Uuid _uuid = const Uuid();
   final FocusNode _inputFocusNode = FocusNode();
-
+  final ThemeProvider themeProvider = Get.find<ThemeProvider>();
   @override
   void initState() {
     super.initState();
@@ -122,10 +124,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = themeProvider.isDarkMode.value;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Joko'),
-        backgroundColor: const Color.fromARGB(255, 68, 255, 90),
+        backgroundColor: isDark ? Colors.lightBlueAccent : const Color.fromARGB(255, 192, 254, 121),
+        foregroundColor: Colors.black,
       ),
       body: Column(
         children: [
