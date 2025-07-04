@@ -34,4 +34,6 @@ class UserSession extends GetxController {
 
   /// Mengecek apakah ada pengguna yang sedang login.
   bool get isLoggedIn => userId.value.isNotEmpty;
+
+  Future init() async {}
 }

@@ -1,9 +1,8 @@
-// lib/screens/profile_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '/controllers/auth_controller.dart';
 import '/controllers/user_controller.dart';
+import '/theme/app_theme.dart';
 import '/theme/theme_provider.dart';
 import '/widgets/nav_bar.dart';
 
@@ -12,31 +11,43 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ambil semua controller yang dibutuhkan menggunakan Get.find()
+    // Ambil semua controller yang dibutuhkan
     final UserController userController = Get.find();
     final AuthController authController = Get.find();
     final ThemeProvider themeProvider = Get.find();
 
-    return Scaffold(
-      body: Obx(() { // Gunakan Obx untuk membuat UI reaktif terhadap perubahan data user
-        final user = userController.user; // Ambil data user dari controller
-        if (user == null) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        return Stack(
+    // Gunakan Obx untuk merebuild UI saat data reaktif (user atau tema) berubah
+    return Obx(() {
+      // Ambil nilai boolean dari isDarkMode.value
+      final isDark = themeProvider.isDarkMode.value;
+      
+      // Tentukan warna berdasarkan status tema
+      final primaryColor = isDark ? AppTheme.darkTheme.colorScheme.primary : AppTheme.lightTheme.colorScheme.primary;
+      final secondaryColor = isDark ? AppTheme.darkTheme.colorScheme.secondary : AppTheme.lightTheme.colorScheme.secondary;
+
+      // Ambil data user dari user.value
+      final user = userController.user.value;
+
+      // Jika user masih loading, tampilkan indikator
+      if (user == null) {
+        return const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      // Jika user sudah ada, bangun UI utama
+      return Scaffold(
+        body: Stack(
           children: [
             Column(
               children: [
-                // Header (Container dengan gradient)
+                // Header
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.only(top: 60, bottom: 30),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [
-                        Theme.of(context).colorScheme.primary,
-                        Theme.of(context).colorScheme.secondary.withOpacity(0.7)
-                      ],
+                      colors: [primaryColor, secondaryColor.withOpacity(0.7)],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
@@ -77,20 +88,20 @@ class ProfileScreen extends StatelessWidget {
                   secondary: const Icon(Icons.fingerprint),
                   value: user.fingerprintEnabled,
                   onChanged: (value) async {
-                    // Panggil fungsi dari controller
                     await userController.updateFingerprintStatus(user.uid, value);
                   },
                 ),
                 const Divider(),
                 // Switch untuk Tema
-                Obx(() => SwitchListTile(
-                      title: const Text('Tema Gelap'),
-                      secondary: const Icon(Icons.dark_mode),
-                      value: themeProvider.isDarkMode,
-                      onChanged: (value) {
-                        themeProvider.toggleTheme(value);
-                      },
-                    )),
+                SwitchListTile(
+                  title: const Text('Tema Gelap'),
+                  secondary: const Icon(Icons.dark_mode),
+                  value: isDark,
+                  onChanged: (value) {
+                    // Cukup panggil toggleTheme, tidak perlu argumen
+                    themeProvider.toggleTheme();
+                  },
+                ),
                 const Divider(),
               ],
             ),
@@ -100,7 +111,6 @@ class ProfileScreen extends StatelessWidget {
               right: 20,
               child: IconButton(
                 onPressed: () {
-                  // Panggil fungsi logout dari controller, lebih bersih!
                   authController.logout();
                 },
                 icon: const Icon(Icons.logout, color: Colors.white),
@@ -108,9 +118,9 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
           ],
-        );
-      }),
-      bottomNavigationBar: const NavBar(currentIndex: 3),
-    );
+        ),
+        bottomNavigationBar: const NavBar(currentIndex: 3),
+      );
+    });
   }
 }

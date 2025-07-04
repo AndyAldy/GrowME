@@ -4,6 +4,7 @@ import '../../models/chat_message.dart';
 import '../../services/gemini_service.dart';
 import '../../widgets/message_bubble.dart';
 import '../../widgets/message_input_bar.dart';
+import '../../widgets/nav_bar.dart';
 
 // Unused imports removed for cleaner code
 
@@ -123,8 +124,8 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Joko AI'),
-        backgroundColor: Colors.blueAccent,
+        title: const Text('Joko'),
+        backgroundColor: const Color.fromARGB(255, 68, 255, 90),
       ),
       body: Column(
         children: [
@@ -152,6 +153,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: const NavBar(currentIndex: 2),
     );
   }
 }

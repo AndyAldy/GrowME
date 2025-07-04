@@ -4,18 +4,29 @@ import 'package:get_storage/get_storage.dart';
 
 class ThemeProvider extends GetxController {
   final _box = GetStorage();
-  ThemeMode themeMode = ThemeMode.light;
+  final _key = 'isDarkMode';
+
+  // 1. Jadikan variabel ini "observable" (reaktif) dengan .obs
+  final isDarkMode = false.obs;
+
+  // 2. Getter untuk mendapatkan ThemeMode saat ini untuk GetMaterialApp
+  ThemeMode get theme => isDarkMode.value ? ThemeMode.dark : ThemeMode.light;
 
   ThemeProvider() {
-    final savedTheme = _box.read('themeMode') ?? 'light';
-    themeMode = savedTheme == 'dark' ? ThemeMode.dark : ThemeMode.light;
+    // 3. Muat tema yang tersimpan saat aplikasi dimulai
+    _loadThemeFromBox();
   }
 
-  bool get isDarkMode => themeMode == ThemeMode.dark;
+  // Method untuk memuat preferensi tema dari penyimpanan
+  void _loadThemeFromBox() {
+    isDarkMode.value = _box.read(_key) ?? false;
+  }
 
-  void toggleTheme(bool isOn) {
-    themeMode = isOn ? ThemeMode.dark : ThemeMode.light;
-    _box.write('themeMode', isOn ? 'dark' : 'light');
-    update(); // ini milik GetxController, bukan notifyListeners
+  // 4. Method untuk mengubah tema menjadi lebih sederhana
+  void toggleTheme() {
+    // Ubah nilai boolean
+    isDarkMode.value = !isDarkMode.value;
+    // Simpan nilai baru ke penyimpanan
+    _box.write(_key, isDarkMode.value);
   }
 }

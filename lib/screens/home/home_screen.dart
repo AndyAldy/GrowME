@@ -1,7 +1,4 @@
-// lib/screens/home/home_screen.dart
-
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -12,15 +9,20 @@ import '/theme/theme_provider.dart';
 import '/widgets/nav_bar.dart';
 import '../portfolio/Chart_screen.dart'; // Sesuaikan path jika berbeda
 
-// Ubah menjadi StatelessWidget, karena GetX yang akan mengelola state
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-  final themeProvider = Get.find<ThemeProvider>();
-  final userController = Get.find<UserController>();
-  final isDark = themeProvider.isDarkMode;
+    // Ambil controller di luar widget Obx
+    final themeProvider = Get.find<ThemeProvider>();
+    final userController = Get.find<UserController>();
+
+    // Bungkus seluruh UI dengan Obx agar reaktif terhadap perubahan tema dan user
+    return Obx(() {
+      // Baca nilai reaktif di dalam Obx
+      final isDark = themeProvider.isDarkMode.value;
+      final user = userController.user.value;
 
       return Scaffold(
         backgroundColor: isDark ? Colors.black : Colors.white,
@@ -37,21 +39,19 @@ class HomeScreen extends StatelessWidget {
           ),
           automaticallyImplyLeading: false,
         ),
-        // --- PERUBAHAN UTAMA DI SINI ---
-        // Menggunakan SingleChildScrollView untuk memastikan seluruh konten bisa di-scroll
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Obx(() => Text(
-                    'Halo ${userController.user?.name ?? 'Calon Investor'}',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: isDark ? Colors.white70 : Colors.black87,
-                    ),
-                  )),
+              Text(
+                'Halo ${user?.name ?? 'Calon Investor'}',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+              ),
               const SizedBox(height: 28),
               Text(
                 'Quick Access',
@@ -101,8 +101,9 @@ class HomeScreen extends StatelessWidget {
         ),
         bottomNavigationBar: const NavBar(currentIndex: 0),
       );
-    }
+    });
   }
+}
 
 // Widget _QuickAction tidak perlu diubah
 class _QuickAction extends StatelessWidget {
@@ -148,8 +149,10 @@ class _QuickAction extends StatelessWidget {
 class InvestmentCalculator extends StatefulWidget {
   final bool isDark;
 
-
-  const InvestmentCalculator({super.key, required this.isDark,});
+  const InvestmentCalculator({
+    super.key,
+    required this.isDark,
+  });
 
   @override
   State<InvestmentCalculator> createState() => _InvestmentCalculatorState();
@@ -162,7 +165,6 @@ class _InvestmentCalculatorState extends State<InvestmentCalculator> {
   int _selectedYear = 1;
   double? _result;
   Timer? _debounce;
-  
 
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   List<Map<String, dynamic>> _reksadanaList = [];
@@ -175,41 +177,41 @@ class _InvestmentCalculatorState extends State<InvestmentCalculator> {
     _fetchAllReksadana();
   }
 
- Future<void> _fetchAllReksadana() async {
-  final snapshot = await _db.collection('reksadana_market').get();
-  if (!mounted) return;
-  setState(() {
-    _reksadanaList = snapshot.docs.map((doc) {
-      final data = doc.data();
-      return {
-        'id': doc.id,
-        'name': data['name'],
-        'type': data['type'],
-      };
-    }).toList();
+  Future<void> _fetchAllReksadana() async {
+    final snapshot = await _db.collection('reksadana_market').get();
+    if (!mounted) return;
+    setState(() {
+      _reksadanaList = snapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'name': data['name'],
+          'type': data['type'],
+        };
+      }).toList();
 
-    if (_reksadanaList.isNotEmpty) {
-      final first = _reksadanaList.first;
-      _selectedReksadanaId = first['id'];
-      _selectedReksadanaType = first['type'];
-    }
+      if (_reksadanaList.isNotEmpty) {
+        final first = _reksadanaList.first;
+        _selectedReksadanaId = first['id'];
+        _selectedReksadanaType = first['type'];
+      }
 
-    _isLoading = false;
-  });
-}
+      _isLoading = false;
+    });
+  }
 
-@override
-void dispose() {
-  _monthlyController.dispose();
-  _debounce?.cancel();
-  super.dispose();
-}
+  @override
+  void dispose() {
+    _monthlyController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
 
   double getEstimatedReturn(String type, int year) {
     final Map<String, Map<int, double>> returnTable = {
       'Pasar Uang': {1: 0.05, 2: 0.06, 3: 0.08, 4: 0.12, 5: 0.13, 6: 0.15, 7: 0.20},
-      'Obligasi':   {1: 0.06, 2: 0.08, 3: 0.10, 4: 0.14, 5: 0.16, 6: 0.18, 7: 0.22},
-      'Saham':      {1: 0.10, 2: 0.15, 3: 0.18, 4: 0.22, 5: 0.28, 6: 0.32, 7: 0.40},
+      'Obligasi': {1: 0.06, 2: 0.08, 3: 0.10, 4: 0.14, 5: 0.16, 6: 0.18, 7: 0.22},
+      'Saham': {1: 0.10, 2: 0.15, 3: 0.18, 4: 0.22, 5: 0.28, 6: 0.32, 7: 0.40},
     };
     return returnTable[type]?[year] ?? 0.05;
   }
@@ -241,13 +243,19 @@ void dispose() {
       decoration: BoxDecoration(
         color: widget.isDark ? Colors.grey[850] : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4))
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Nominal per Bulan:',
-              style: TextStyle(color: widget.isDark ? Colors.white70 : Colors.black87)),
+              style: TextStyle(
+                  color: widget.isDark ? Colors.white70 : Colors.black87)),
           const SizedBox(height: 8),
           TextField(
               controller: _monthlyController,
@@ -256,28 +264,33 @@ void dispose() {
                 hintText: '10000',
                 filled: true,
                 fillColor: widget.isDark ? Colors.grey[800] : Colors.grey[100],
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none),
               ),
-onChanged: (value) {
-  if (_debounce?.isActive ?? false) _debounce!.cancel();
-  _debounce = Timer(const Duration(milliseconds: 500), () {
-    if (mounted) {
-      setState(() {
-        _result = null;
-      });
-    }
-  });
-}),
+              onChanged: (value) {
+                if (_debounce?.isActive ?? false) _debounce!.cancel();
+                _debounce = Timer(const Duration(milliseconds: 500), () {
+                  if (mounted) {
+                    setState(() {
+                      _result = null;
+                    });
+                  }
+                });
+              }),
           const SizedBox(height: 16),
           Text('Pilih Reksadana:',
-              style: TextStyle(color: widget.isDark ? Colors.white70 : Colors.black87)),
+              style: TextStyle(
+                  color: widget.isDark ? Colors.white70 : Colors.black87)),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
             value: _selectedReksadanaId,
             decoration: InputDecoration(
               filled: true,
               fillColor: widget.isDark ? Colors.grey[800] : Colors.grey[100],
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none),
             ),
             items: _reksadanaList.map((rek) {
               final label = '${rek['type']} - ${rek['name']}';
@@ -299,14 +312,17 @@ onChanged: (value) {
           ),
           const SizedBox(height: 16),
           Text('Durasi Investasi (tahun):',
-              style: TextStyle(color: widget.isDark ? Colors.white70 : Colors.black87)),
+              style: TextStyle(
+                  color: widget.isDark ? Colors.white70 : Colors.black87)),
           const SizedBox(height: 8),
           DropdownButtonFormField<int>(
             value: _selectedYear,
             decoration: InputDecoration(
               filled: true,
               fillColor: widget.isDark ? Colors.grey[800] : Colors.grey[100],
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none),
             ),
             items: List.generate(7, (i) => i + 1).map((year) {
               return DropdownMenuItem(value: year, child: Text('$year Tahun'));
@@ -350,8 +366,8 @@ onChanged: (value) {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Total Investasi:',
-                    style:
-                        TextStyle(color: widget.isDark ? Colors.white70 : Colors.black87)),
+                    style: TextStyle(
+                        color: widget.isDark ? Colors.white70 : Colors.black87)),
                 Text(
                   formatter.format(
                       double.parse(_monthlyController.text.replaceAll('.', '')) *
@@ -366,14 +382,15 @@ onChanged: (value) {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Keuntungan Estimasi:',
-                    style:
-                        TextStyle(color: widget.isDark ? Colors.white70 : Colors.black87)),
+                    style: TextStyle(
+                        color: widget.isDark ? Colors.white70 : Colors.black87)),
                 Text(
                   formatter.format(_result! -
                       (double.parse(_monthlyController.text.replaceAll('.', '')) *
                           12 *
                           _selectedYear)),
-                  style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.green),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, color: Colors.green),
                 ),
               ],
             ),
@@ -382,12 +399,14 @@ onChanged: (value) {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Total Akhir:',
-                    style:
-                        TextStyle(color: widget.isDark ? Colors.white70 : Colors.black87)),
+                    style: TextStyle(
+                        color: widget.isDark ? Colors.white70 : Colors.black87)),
                 Text(
                   formatter.format(_result),
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.green, fontSize: 16),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                      fontSize: 16),
                 ),
               ],
             ),

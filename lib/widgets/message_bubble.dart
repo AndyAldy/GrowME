@@ -42,7 +42,7 @@ class MessageBubble extends StatelessWidget {
             : MarkdownBody(
                 data: message,
                 styleSheet: MarkdownStyleSheet(
-                  p: const TextStyle(color: Colors.white),
+                  p: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
                   code: const TextStyle(backgroundColor: Colors.transparent),
                 ),
               ),

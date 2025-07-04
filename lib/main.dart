@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+import 'package:provider/provider.dart';
 import 'controllers/auth_controller.dart';
 import 'controllers/user_controller.dart';
-import 'controllers/chart_data_controller.dart'; // Jika Anda punya controller ini
+import 'controllers/chart_data_controller.dart';
 import 'utils/user_session.dart';
 import 'theme/theme_provider.dart'; 
 import 'theme/app_theme.dart';
