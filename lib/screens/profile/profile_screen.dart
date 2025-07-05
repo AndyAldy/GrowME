@@ -106,17 +106,47 @@ class ProfileScreen extends StatelessWidget {
               ],
             ),
             // Tombol Logout
-            Positioned(
-              top: 40,
-              right: 20,
-              child: IconButton(
-                onPressed: () {
-                  authController.logout();
-                },
-                icon: const Icon(Icons.logout, color: Colors.white),
-                tooltip: 'Keluar',
-              ),
+Positioned(
+  top: 40,
+  right: 20,
+  child: IconButton(
+    onPressed: () {
+      // Tampilkan dialog konfirmasi menggunakan GetX
+      Get.dialog(
+        AlertDialog(
+          title: const Text(
+            'Konfirmasi Logout',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text('Apakah Anda yakin ingin keluar?'),
+          actions: [
+            // Tombol "Gajadi"
+            TextButton(
+              child: const Text('Gajadi'),
+              onPressed: () {
+                // Tutup dialog
+                Get.back(); 
+              },
             ),
+            // Tombol "Yakin"
+            TextButton(
+              child: const Text(
+                'Yakin',
+                style: TextStyle(color: Colors.red), // Beri warna merah untuk aksi destruktif
+              ),
+              onPressed: () {
+                // Panggil fungsi logout jika pengguna yakin
+                authController.logout();
+              },
+            ),
+          ],
+        ),
+      );
+    },
+    icon: const Icon(Icons.logout, color: Colors.white),
+    tooltip: 'Keluar',
+  ),
+),
           ],
         ),
         bottomNavigationBar: const NavBar(currentIndex: 3),

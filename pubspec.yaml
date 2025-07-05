@@ -1,7 +1,7 @@
 name : GrowME
 description: "A new Flutter project."
 publish_to: 'none' # Recommended: set to 'none' to prevent accidental publishing.
-version: 1.1.0+12
+version: 1.1.0+14
 
 environment:
   # Menaikkan versi SDK ke yang lebih modern dan stabil
@@ -15,8 +15,7 @@ dependencies:
   firebase_core: ^2.30.0
   firebase_auth: ^4.17.0
   cloud_firestore: ^4.17.0
-
-  # State Management & Utilities
+  in_app_update: ^4.2.3
   provider: ^6.1.1
   get: ^4.6.6 # Sedikit update versi
   get_storage: ^2.1.1

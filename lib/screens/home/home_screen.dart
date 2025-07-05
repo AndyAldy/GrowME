@@ -128,7 +128,7 @@ class _QuickAction extends StatelessWidget {
           CircleAvatar(
             radius: 28,
             backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-            child: Icon(icon, size: 28, color: isDark ? Color(0xFF87CEEB) : Colors.blueAccent),
+            child: Icon(icon, size: 28, color: isDark ? const Color(0xFF87CEEB) : Colors.blueAccent),
           ),
           const SizedBox(height: 6),
           Text(
@@ -341,7 +341,7 @@ class _InvestmentCalculatorState extends State<InvestmentCalculator> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: Color(0xFF87CEEB),
+                backgroundColor: const Color(0xFF87CEEB),
                 foregroundColor: const Color.fromARGB(255, 42, 42, 42),
               ),
               onPressed: _calculate,
