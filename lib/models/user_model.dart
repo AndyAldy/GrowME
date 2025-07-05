@@ -4,68 +4,39 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   final String uid;
+  final String name;
   final String email;
-  final num? saldo;
-  final String? name;
-  final bool fingerprintEnabled;
+  num saldo;
+  bool fingerprintEnabled;
 
   UserModel({
     required this.uid,
+    required this.name,
     required this.email,
-    this.saldo,
-    this.name,
+    required this.saldo,
     this.fingerprintEnabled = false,
   });
 
-  /// Method untuk membuat salinan objek UserModel dengan data yang diperbarui.
-  UserModel copyWith({
-    String? uid,
-    String? email,
-    num? saldo,
-    String? name,
-    bool? fingerprintEnabled,
-  }) {
-    return UserModel(
-      uid: uid ?? this.uid,
-      email: email ?? this.email,
-      saldo: saldo ?? this.saldo,
-      name: name ?? this.name,
-      fingerprintEnabled: fingerprintEnabled ?? this.fingerprintEnabled,
-    );
-  }
-
-  /// Factory constructor untuk membuat instance UserModel dari Map (misalnya, dari Firestore).
-  factory UserModel.fromMap(Map<String, dynamic> map, String uid) {
-    return UserModel(
-      uid: uid,
-      email: map['email'] ?? '',
-      saldo: map['saldo'] as num?, // Casting ke num? untuk keamanan tipe data
-      name: map['name'] as String?, // Casting ke String?
-      fingerprintEnabled: map['fingerprintEnabled'] ?? false,
-    );
-  }
-
-  /// Method untuk mengubah instance UserModel menjadi Map.
+  /// Mengubah objek UserModel menjadi Map untuk disimpan di Firestore.
   Map<String, dynamic> toMap() {
     return {
+      'uid': uid,
+      'name': name,
       'email': email,
       'saldo': saldo,
-      'name': name,
       'fingerprintEnabled': fingerprintEnabled,
     };
   }
 
-  /// Factory constructor untuk membuat instance UserModel dari DocumentSnapshot.
+  /// Membuat objek UserModel dari DocumentSnapshot Firestore.
   factory UserModel.fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
     return UserModel(
-      uid: doc.id,
-      email: data['email'] ?? '',
-      saldo: data['saldo'] as num?,
-      name: data['name'] as String?,
+      uid: doc.id, // Mengambil UID dari ID dokumen
+      name: data['name'] ?? 'No Name',
+      email: data['email'] ?? 'No Email',
+      saldo: data['saldo'] ?? 0,
       fingerprintEnabled: data['fingerprintEnabled'] ?? false,
     );
   }
-
-  // TIDAK ADA LAGI METHOD updateSession() DI SINI
 }

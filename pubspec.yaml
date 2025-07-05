@@ -1,7 +1,7 @@
 name : GrowME
 description: "A new Flutter project."
 publish_to: 'none' # Recommended: set to 'none' to prevent accidental publishing.
-version: 1.1.0+9
+version: 1.1.0+12
 
 environment:
   # Menaikkan versi SDK ke yang lebih modern dan stabil

@@ -5,35 +5,32 @@ import 'package:get_storage/get_storage.dart';
 
 class UserSession extends GetxController {
   final _storage = GetStorage();
+  // Gunakan nama kunci yang sama dan konsisten
   static const _userIdKey = 'userId';
 
-  // RxString untuk reaktivitas di seluruh aplikasi
-  final RxString userId = ''.obs;
+  // Variabel ini untuk sesi yang sedang aktif di memori
+  final RxString activeUserId = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    // Muat userId dari penyimpanan saat aplikasi dimulai
+    // Saat aplikasi dimulai, coba isi sesi aktif dari penyimpanan
     final storedUserId = _storage.read<String>(_userIdKey);
-    if (storedUserId != null && storedUserId.isNotEmpty) {
-      userId.value = storedUserId;
+    if (storedUserId != null) {
+      activeUserId.value = storedUserId;
     }
   }
 
-  /// Memulai sesi baru dengan menyimpan UID pengguna.
+  /// Memulai sesi baru dan MENYIMPAN ID ke penyimpanan permanen
   Future<void> startSession(String uid) async {
-    userId.value = uid;
+    activeUserId.value = uid;
     await _storage.write(_userIdKey, uid);
   }
 
-  /// Menghapus sesi pengguna saat logout.
-  Future<void> clearSession() async {
-    userId.value = '';
-    await _storage.remove(_userIdKey);
+  /// Mengunci aplikasi dengan MENGOSONGKAN sesi aktif di memori,
+  /// TAPI TIDAK MENGHAPUS DARI PENYIMPANAN.
+  Future<void> clearActiveSession() async {
+    activeUserId.value = '';
+    // Perhatikan: Tidak ada lagi `_storage.remove()` di sini.
   }
-
-  /// Mengecek apakah ada pengguna yang sedang login.
-  bool get isLoggedIn => userId.value.isNotEmpty;
-
-  Future init() async {}
 }

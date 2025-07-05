@@ -1,10 +1,8 @@
-import 'package:GrowME/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:local_auth/local_auth.dart';
 import '/controllers/auth_controller.dart';
 import '/controllers/user_controller.dart';
-import '/utils/user_session.dart';
 import '../../theme/halus.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -133,12 +131,10 @@ class BiometricLoginSection extends StatefulWidget {
 
 class _BiometricLoginSectionState extends State<BiometricLoginSection> {
   final auth = LocalAuthentication();
-  final session = Get.find<UserSession>();
   final userController = Get.find<UserController>();
 
   bool _isChecking = true;
   bool _showBiometric = false;
-  String? _lastUserId;
 
   @override
   void initState() {
@@ -148,43 +144,40 @@ class _BiometricLoginSectionState extends State<BiometricLoginSection> {
 
   Future<void> _checkBiometrics() async {
     final args = Get.arguments;
-    String? extractedUserId;
+    String? userId;
 
-    if (args is Map && args['userId'] is String) {
-      extractedUserId = args['userId'] as String;
+    if (args is Map && args.containsKey('userId')) {
+      userId = args['userId'] as String?;
     }
 
-    final userId =
-        session.userId.isNotEmpty ? session.userId.value : extractedUserId;
-
     if (userId == null || userId.isEmpty) {
-      setState(() => _isChecking = false);
+      if (mounted) setState(() => _isChecking = false);
       return;
     }
 
-    UserModel? user;
+
     try {
-      user = await userController
-          .getUserData(userId)
-          .timeout(const Duration(seconds: 10), onTimeout: () {
-        print("[BIOMETRIK] Timeout");
-        return null;
-      });
+      final canBiometric = await auth.canCheckBiometrics;
+      if (!canBiometric) {
+        if (mounted) setState(() => _isChecking = false);
+        return;
+      }
+
+      final user = await userController.getUserData(userId);
+
+      if (mounted) {
+        setState(() {
+          _showBiometric = user?.fingerprintEnabled ?? false;
+          _isChecking = false;
+        });
+      }
     } catch (e) {
-      print("[BIOMETRIK] Error getUserData: $e");
-    }
-
-    final canBiometric = await auth.canCheckBiometrics;
-
-    if (mounted) {
-      setState(() {
-        _lastUserId = userId;
-        _showBiometric = canBiometric && (user?.fingerprintEnabled ?? false);
-        _isChecking = false;
-      });
+      print("[BIOMETRIK] Gagal memeriksa status: $e");
+      if (mounted) setState(() => _isChecking = false);
     }
   }
 
+  // FUNGSI INI SEKARANG BERADA DI LUAR _checkBiometrics (POSISI YANG BENAR)
   Future<void> _authenticate() async {
     try {
       final authenticated = await auth.authenticate(
@@ -195,9 +188,8 @@ class _BiometricLoginSectionState extends State<BiometricLoginSection> {
         ),
       );
 
-      if (authenticated && _lastUserId != null) {
-        await session.startSession(_lastUserId!);
-        await userController.getUserData(_lastUserId!);
+      if (authenticated) {
+        Get.find<UserController>().reinitializeUser();
         Get.offAllNamed('/home');
       }
     } catch (e) {
@@ -209,14 +201,19 @@ class _BiometricLoginSectionState extends State<BiometricLoginSection> {
   Widget build(BuildContext context) {
     if (_isChecking) {
       return const SizedBox(
-          height: 50, child: Center(child: CircularProgressIndicator()));
+        height: 50,
+        child: Center(child: CircularProgressIndicator()),
+      );
     }
 
-    if (!_showBiometric) return const SizedBox.shrink();
+    if (!_showBiometric) {
+      return const SizedBox.shrink();
+    }
 
     return Column(
       children: [
         ElevatedButton.icon(
+          // Panggil fungsi _authenticate yang sudah benar posisinya
           onPressed: _authenticate,
           icon: const Icon(Icons.fingerprint),
           label: const Text("Login dengan Sidik Jari"),
