@@ -43,7 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   bool _confirmPasswordVisible = false;
 
   ActiveField _activeField = ActiveField.name;
-  double _bubbleYPosition = 0;
+  double _bubbleYPosition = 2;
 
   bool _isEmailEnabled = false;
   bool _isPasswordEnabled = false;
@@ -79,17 +79,20 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   void _handleFocusChange(ActiveField field, GlobalKey key) {
-    if ((field == ActiveField.name && _nameFocus.hasFocus) ||
-        (field == ActiveField.email && _emailFocus.hasFocus) ||
-        (field == ActiveField.password && _passwordFocus.hasFocus) ||
-        (field == ActiveField.confirm && _confirmPasswordFocus.hasFocus)) {
+    final focusNode =
+          field == ActiveField.name ? _nameFocus :
+          field == ActiveField.email ? _emailFocus :
+          field == ActiveField.password ? _passwordFocus :
+          _confirmPasswordFocus;
+    
+    if (focusNode.hasFocus) {
       if (key.currentContext != null) {
         final RenderBox renderBox =
             key.currentContext!.findRenderObject() as RenderBox;
-        final position = renderBox.localToGlobal(Offset.zero);
+        final position = renderBox.localToGlobal(Offset.zero, ancestor: context.findRenderObject());
         setState(() {
           _activeField = field;
-          _bubbleYPosition = position.dy + (renderBox.size.height / 2);
+          _bubbleYPosition = position.dy - 40;
         });
         _animationController!.forward(from: 0);
       }
@@ -129,9 +132,7 @@ Future<void> _register() async {
 
     if (userCredential.user != null) {
       // ✅ Tambahkan ini agar token login ter-refresh
-      await userCredential.user!.getIdToken(true); // <-- WAJIB TAMBAH
-
-      // ✅ Panggil createUser di Firestore setelah token siap
+      await userCredential.user!.getIdToken(true);
       await userController.createUser(
         userCredential.user!.uid,
         _nameController.text.trim(),
