@@ -11,6 +11,7 @@ import 'theme/theme_provider.dart';
 import 'theme/app_theme.dart';
 import 'routes.dart';
 import 'firebase_options.dart';
+import 'package:flutter/scheduler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,26 +30,81 @@ class GrowME extends StatefulWidget {
   State<GrowME> createState() => _GrowMEState();
 }
 
-class _GrowMEState extends State<GrowME> {
+// DIUBAH: Tambahkan 'with WidgetsBindingObserver'
+class _GrowMEState extends State<GrowME> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    _checkForUpdate();
+    // Daftarkan observer untuk mendengarkan siklus hidup aplikasi
+    WidgetsBinding.instance.addObserver(this);
+    
+    // Panggil pengecekan update setelah frame pertama selesai
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _checkForUpdate();
+    });
   }
 
+  @override
+  void dispose() {
+    // Hapus observer untuk mencegah kebocoran memori
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // BARU: Method ini akan berjalan setiap kali pengguna kembali ke aplikasi
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // Periksa apakah ada update yang sudah terunduh dan siap diinstal
+      _promptToInstallUpdate();
+    }
+  }
+
+  // Langkah 1: Memeriksa dan memulai unduhan update
   Future<void> _checkForUpdate() async {
     try {
       final AppUpdateInfo updateInfo = await InAppUpdate.checkForUpdate();
-
-      // Periksa apakah update tersedia
       if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
-        // Memulai "flexible update".
-        // Ini akan menampilkan dialog dari Google Play dengan opsi "Nanti" dan "Update".
+        // Mulai unduhan di latar belakang
         await InAppUpdate.startFlexibleUpdate();
+        // Langsung cek, karena update kecil bisa selesai sangat cepat
+        _promptToInstallUpdate();
       }
     } catch (e) {
-      print('Gagal melakukan pengecekan update: $e');
+      print('Gagal memulai pengecekan update: $e');
     }
+  }
+  
+  // BARU: Langkah 2: Memeriksa dan memicu instalasi
+  Future<void> _promptToInstallUpdate() async {
+    try {
+      final AppUpdateInfo updateInfo = await InAppUpdate.checkForUpdate();
+      // Jika statusnya DOWNLOADED, artinya siap diinstal
+      if (updateInfo.installStatus == InstallStatus.downloaded) {
+        // Tampilkan notifikasi untuk mengajak user me-restart
+        _showInstallSnackbar();
+      }
+    } catch (e) {
+      print('Gagal memeriksa status instalasi: $e');
+    }
+  }
+  
+  // BARU: Menampilkan notifikasi/snackbar untuk restart
+  void _showInstallSnackbar() {
+    Get.snackbar(
+      "Update Telah Terunduh",
+      "Restart aplikasi untuk menginstal versi baru.",
+      duration: const Duration(days: 1), // Dibuat persisten
+      isDismissible: false,
+      mainButton: TextButton(
+        child: const Text('RESTART SEKARANG'),
+        onPressed: () {
+          // KUNCI UTAMA: Memanggil fungsi untuk menginstal update
+          InAppUpdate.completeFlexibleUpdate();
+        },
+      ),
+    );
   }
 
   @override
