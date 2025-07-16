@@ -119,9 +119,6 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-
-
-// Widget terpisah untuk logika Biometrik agar lebih rapi
 class BiometricLoginSection extends StatefulWidget {
   const BiometricLoginSection({super.key});
 
